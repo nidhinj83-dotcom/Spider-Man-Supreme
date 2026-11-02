@@ -1,0 +1,1699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>SPIDER-MAN — The Red Aura · Designed by Nohan</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { background:#0b0e1a; color:#eef1ff; font-family:'Segoe UI', Arial, Helvetica, sans-serif; }
+  #wrap { max-width:960px; margin:0 auto; padding:10px; }
+  h1.title { text-align:center; font-size:clamp(26px,6vw,44px); letter-spacing:1px; color:#ff3b3b;
+    text-shadow:0 0 18px rgba(255,40,40,.55), 0 2px 0 #7a0d0d; margin:8px 0 2px; }
+  .subtitle { text-align:center; color:#9fb4ff; font-size:clamp(13px,3vw,17px); margin-bottom:4px; }
+  .credit { text-align:center; color:#ffd75e; font-size:14px; margin-bottom:10px; }
+  #hud { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin:8px 0; }
+  .chip { background:#171c33; border:1px solid #2c3766; border-radius:20px; padding:4px 12px; font-size:13.5px; }
+  .chip b { color:#ffd75e; }
+  #repbar { width:210px; height:10px; background:linear-gradient(90deg,#c62828 0%,#5a5f7a 50%,#2e7d32 100%);
+    border-radius:6px; position:relative; display:inline-block; vertical-align:middle; margin-left:6px; border:1px solid #000; }
+  #repdot { position:absolute; top:-3px; width:14px; height:14px; border-radius:50%; background:#fff; border:2px solid #111; transition:left .5s; }
+  #stage { position:relative; background:#11162b; border:2px solid #2c3766; border-radius:14px; overflow:hidden; min-height:420px; }
+  /* ---------- story scenes ---------- */
+  #sceneBox { padding:18px; display:none; }
+  #artPanel { height:190px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+    font-size:96px; margin-bottom:14px; border:1px solid rgba(255,255,255,.15); text-shadow:0 6px 24px rgba(0,0,0,.6); }
+  #chapterTag { color:#ff8080; font-weight:bold; letter-spacing:2px; font-size:13px; text-transform:uppercase; margin-bottom:6px; }
+  #sceneText { font-size:clamp(16px,2.6vw,19.5px); line-height:1.55; min-height:120px; }
+  #sceneText p { margin-bottom:10px; animation:fadein .5s both; }
+  #sceneText p:nth-child(2){animation-delay:.15s} #sceneText p:nth-child(3){animation-delay:.3s}
+  #sceneText p:nth-child(4){animation-delay:.45s} #sceneText p:nth-child(5){animation-delay:.6s}
+  @keyframes fadein { from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
+  .speaker { color:#ffd75e; font-weight:bold; }
+  .red { color:#ff5a5a; font-weight:bold; }
+  .good { color:#7be495; font-weight:bold; }
+  #btnRow { display:flex; flex-direction:column; gap:10px; margin-top:14px; }
+  button.bigbtn { background:linear-gradient(180deg,#27408f,#16245c); color:#fff; border:2px solid #4f74e0;
+    border-radius:12px; padding:15px 16px; font-size:clamp(16px,3vw,19px); cursor:pointer; text-align:left; font-family:inherit; }
+  button.bigbtn:hover, button.bigbtn:active { background:linear-gradient(180deg,#3556bd,#1d3170); }
+  button.contbtn { background:linear-gradient(180deg,#b71c1c,#7a0d0d); border-color:#ff6b6b; text-align:center; font-weight:bold; }
+  button:disabled { opacity:.45; cursor:not-allowed; }
+  /* ---------- fight ---------- */
+  #fightBox { display:none; }
+  #fightBars { display:flex; justify-content:space-between; gap:10px; padding:8px 10px 2px; }
+  .barwrap { flex:1; }
+  .barlabel { font-size:13px; margin-bottom:3px; }
+  .bar { height:16px; background:#2a0f14; border:1px solid #000; border-radius:8px; overflow:hidden; }
+  .bar > div { height:100%; transition:width .18s; }
+  #playerHpFill { background:linear-gradient(90deg,#43a047,#8bc34a); }
+  #bossHpFill { background:linear-gradient(90deg,#c62828,#ef5350); }
+  #superWrap { padding:2px 10px 6px; display:flex; align-items:center; gap:8px; font-size:13px; }
+  #superBar { flex:1; height:13px; background:#241a2e; border:1px solid #000; border-radius:7px; overflow:hidden; }
+  #superFill { height:100%; width:0%; background:linear-gradient(90deg,#ff7043,#ff1744); transition:width .15s; }
+  #fightMsg { text-align:center; min-height:24px; font-size:16.5px; color:#ffd75e; padding:2px 6px; font-weight:bold; }
+  canvas { display:block; width:100%; height:auto; background:#141a30; touch-action:none; }
+  #touchBtns { display:none; justify-content:space-between; padding:8px; gap:8px; }
+  .pad { display:grid; grid-template-columns:repeat(3,52px); grid-template-rows:repeat(3,52px); gap:4px; }
+  .pad button, .acts button { background:#1d2547; color:#fff; border:2px solid #3c4c8c; border-radius:12px; font-size:19px; cursor:pointer; font-family:inherit; }
+  .pad button:active, .acts button:active { background:#31448f; }
+  .acts { display:grid; grid-template-columns:repeat(2,74px); grid-template-rows:repeat(3,52px); gap:4px; }
+  .acts button { font-size:13.5px; font-weight:bold; }
+  #superBtn { background:#5c0f16; border-color:#ff5252; }
+  #keysHelp { text-align:center; color:#8fa3d9; font-size:13px; padding:4px 8px 10px; }
+  /* ---------- title / endings ---------- */
+  #titleBox { padding:26px 18px; text-align:center; }
+  #titleBox .bigemoji { font-size:84px; }
+  #endingsTrack { margin:14px 0; font-size:16px; color:#cdd8ff; }
+  #recapBox { background:#141a30; border:1px solid #2c3766; border-radius:10px; padding:12px 14px; text-align:left; margin:12px 0; font-size:16px; line-height:1.6; }
+  /* ---------- free roam ---------- */
+  #roamBox { display:none; }
+  #roamHint { text-align:center; font-size:clamp(14px,2.6vw,17px); font-weight:bold; color:#ffd75e; padding:8px 8px 6px; min-height:26px; }
+  #roamHelp { text-align:center; color:#8fa3d9; font-size:13px; padding:4px 8px 10px; }
+  #roamTouch { display:none; justify-content:space-between; padding:8px; gap:8px; }
+  @media (max-width:760px), (pointer:coarse){ #roamTouch{ display:flex; } #roamHelp{ display:none; } }
+  body.touch #touchBtns { display:flex; }
+  body.touch #roamTouch { display:flex; }
+  body.touch #keysHelp, body.touch #roamHelp { display:none; }
+  @media (max-width:760px), (pointer:coarse){ #touchBtns{ display:flex; } #keysHelp{ display:none; } }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <h1 class="title">🕷️ SPIDER-MAN</h1>
+  <div class="subtitle">— THE RED AURA —</div>
+  <div class="credit">⭐ Designed by Nohan ⭐</div>
+
+  <div id="hud" style="display:none">
+    <span class="chip">⚖️ Kills <b id="hudKills">0</b> · Arrests <b id="hudArrests">0</b> · Cures <b id="hudCures">0</b></span>
+    <span class="chip">🧠 Control: <b id="hudControl">—</b></span>
+    <span class="chip">🏙️ City <span id="repbar"><span id="repdot"></span></span> <b id="hudRepText"></b></span>
+  </div>
+
+  <div id="stage">
+    <!-- TITLE -->
+    <div id="titleBox">
+      <div class="bigemoji">🕷️</div>
+      <p style="font-size:18px;line-height:1.55;max-width:620px;margin:8px auto;">
+        A new power is waking up inside Peter Parker — a <span class="red">red aura</span> he cannot control.
+        Four bosses stand ahead of him. What he does with that power — heal, arrest, cure… or kill —
+        will decide whether the city calls him a hero, or calls for heroes to stop him.
+      </p>
+      <div id="endingsTrack">Endings discovered: <span id="endingsList">❔ ????? · ❔ ?????</span></div>
+      <div id="btnRow" style="max-width:420px;margin:14px auto 0;">
+        <button class="bigbtn contbtn" id="startBtn">▶ &nbsp;START THE STORY</button>
+      </div>
+      <div style="max-width:420px;margin:10px auto 0;">
+        <button class="bigbtn" id="rushBtn">👑 &nbsp;BOSS RUSH</button>
+        <button class="bigbtn" id="gauntletBtn" style="margin-top:8px;">🔥 &nbsp;HARDEST GAUNTLET</button>
+        <button class="bigbtn" id="venomBtn" style="margin-top:8px;">🖤 &nbsp;DLC: VENOM</button>
+        <button class="bigbtn" id="rematchBtn" style="margin-top:8px;">🔥 &nbsp;FINAL REMATCH</button>
+      </div>
+      <p id="progStatus" style="color:#ffd83d;font-size:13.5px;margin-top:10px;"></p>
+      <p id="rushBest" style="color:#ce93d8;font-size:13.5px;margin-top:2px;"></p>
+      <div id="upPanel" style="max-width:520px;margin:12px auto 0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:10px 12px;">
+        <div style="font-weight:bold;color:#ffd83d;">⬆️ UPGRADES — <span id="upPts">Points: 0</span></div>
+        <div style="font-size:13px;color:#b8c6e8;margin:4px 0 8px;">Beat bosses anywhere to earn points. Upgrades work in EVERY mode — story, rush, gauntlet, Venom — forever.</div>
+        <div id="upRows"></div>
+      </div>
+      <p style="color:#7be495;font-size:14.5px;margin-top:10px;">🗽 NEW: Free-roam NEW YORK between missions — walk, run and web-swing anywhere you want!</p>
+      <p style="color:#8fa3d9;font-size:13.5px;margin-top:12px;">⌨️ Move: WASD / Arrows · Attack: J · Dodge: K · Web: L · Heal: H · SUPER: U &nbsp;|&nbsp; 📱 Touch buttons appear on mobile</p>
+    </div>
+
+    <!-- STORY -->
+    <div id="sceneBox">
+      <div id="artPanel">🌆</div>
+      <div id="chapterTag">CHAPTER</div>
+      <div id="sceneText"></div>
+      <div id="btnRow"></div>
+    </div>
+
+    <!-- FIGHT -->
+    <div id="fightBox">
+      <div id="fightBars">
+        <div class="barwrap">
+          <div class="barlabel">🕷️ SPIDER-MAN <span id="healInfo"></span></div>
+          <div class="bar"><div id="playerHpFill" style="width:100%"></div></div>
+        </div>
+        <div class="barwrap">
+          <div class="barlabel" style="text-align:right" id="bossLabel">BOSS</div>
+          <div class="bar"><div id="bossHpFill" style="width:100%"></div></div>
+        </div>
+      </div>
+      <div id="superWrap"><span>🔴 SUPER</span><div id="superBar"><div id="superFill"></div></div><span id="superState"></span></div>
+      <div id="fightMsg"></div>
+      <canvas id="cv" width="900" height="500"></canvas>
+      <div id="touchBtns">
+        <div class="pad">
+          <span></span><button data-k="up">▲</button><span></span>
+          <button data-k="left">◀</button><span></span><button data-k="right">▶</button>
+          <span></span><button data-k="down">▼</button><span></span>
+        </div>
+        <div class="acts">
+          <button data-k="attack">👊 HIT</button>
+          <button data-k="dodge">💨 DODGE</button>
+          <button data-k="web">🕸️ WEB</button>
+          <button data-k="heal">🩹 HEAL</button>
+          <button data-k="super" id="superBtn">🔴 SUPER</button>
+          <button data-k="attack2">👊 HIT</button>
+        </div>
+      </div>
+      <div id="keysHelp">WASD / Arrows — move · J — attack · K — dodge · L — web · H — heal · U — SUPER (when the meter is full!)</div>
+    </div>
+
+    <!-- MODE INTERMISSION (Boss Rush / Gauntlet / Rematch) -->
+    <div id="rushBox" style="display:none;">
+      <div class="bigemoji">👑</div>
+      <h2 id="rushTitle" style="color:#ffd83d;">BOSS DOWN!</h2>
+      <p id="rushText" style="font-size:17px;line-height:1.55;max-width:560px;margin:8px auto;"></p>
+      <div style="max-width:520px;margin:12px auto 0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:10px 12px;">
+        <div style="font-weight:bold;color:#ffd83d;">⬆️ UPGRADES — <span id="upPts2">Points: 0</span></div>
+        <div id="upRows2"></div>
+      </div>
+      <div style="max-width:420px;margin:14px auto 0;">
+        <button class="bigbtn contbtn" id="rushNextBtn">▶ &nbsp;NEXT BOSS</button>
+        <button class="bigbtn" id="rushQuitBtn" style="margin-top:8px;">🏁 BACK TO TITLE</button>
+      </div>
+    </div>
+
+    <!-- ROAM -->
+    <div id="roamBox">
+      <div id="roamHint">🗽 Free Roam</div>
+      <canvas id="rcv" width="900" height="500"></canvas>
+      <div id="roamTouch">
+        <div class="pad">
+          <span></span><button data-rk="up">▲</button><span></span>
+          <button data-rk="left">◀</button><span></span><button data-rk="right">▶</button>
+          <span></span><button data-rk="down">▼</button><span></span>
+        </div>
+        <div class="acts" style="grid-template-columns:78px;grid-template-rows:64px;">
+          <button data-rk="swing" style="background:#5c0f16;border-color:#ff5252;">🕸️ SWING</button>
+        </div>
+      </div>
+      <div id="roamHelp">WASD / Arrows — move · Hold SPACE — 🕸️ WEB-SWING · Walk into the ⭐ to start the mission!</div>
+    </div>
+  </div>
+  <p style="text-align:center;color:#5f6f9e;font-size:12.5px;margin-top:8px;">A fan game made at home · Works offline · Progress in a run is not saved between chapters — your endings are!</p>
+</div>
+
+<script>
+'use strict';
+/* ============================================================
+   SPIDER-MAN — THE RED AURA · Designed by Nohan
+   Chapter story + arena boss fights + branching morality.
+   ============================================================ */
+
+// ---------- persistent endings ----------
+var ENDKEY = 'redAuraEndings';
+function loadEndings(){ try { return JSON.parse(localStorage.getItem(ENDKEY)) || {}; } catch(e){ return {}; } }
+function saveEnding(k){ try { var e = loadEndings(); e[k]=true; localStorage.setItem(ENDKEY, JSON.stringify(e)); } catch(e){} }
+function refreshEndingsTrack(){
+  var e = loadEndings(), parts = [];
+  parts.push(e.hero ? '🌟 Hero of the City' : '❔ ?????');
+  parts.push(e.hunted ? '🌑 Hunted' : '❔ ?????');
+  var el = document.getElementById('endingsList'); if (el) el.textContent = parts.join(' · ');
+}
+
+// ---------- run state ----------
+var S; // run state
+function newState(){
+  return {
+    kills:0, arrests:0, cures:0,
+    rep:0,                 // -10 (hated) .. +10 (loved)
+    trained:false,         // CONTROL track
+    controlShown:'—',
+    kingpinKilled:false,
+    milesHurt:false,
+    lizardOutcome:'',      // 'escaped' | 'cured' | 'killed'
+    record:[]              // [{boss, result}]
+  };
+}
+function goodScore(){ return S.arrests + S.cures; }
+function isGoodDominant(){
+  // Dominance rule: good wins if arrests+cures > kills.
+  // A tie goes GOOD only when kills == 0; a tie with any kill on record goes DARK.
+  if (goodScore() > S.kills) return true;
+  if (goodScore() === S.kills && S.kills === 0) return true;
+  return false;
+}
+function repText(){
+  if (S.rep >= 6) return 'LOVED 🌟';
+  if (S.rep >= 3) return 'Trusted';
+  if (S.rep >= 1) return 'Hopeful';
+  if (S.rep === 0) return 'Watching';
+  if (S.rep >= -2) return 'Worried';
+  if (S.rep >= -5) return 'Afraid';
+  return 'HATED 🌑';
+}
+function updateHUD(){
+  document.getElementById('hud').style.display = 'flex';
+  document.getElementById('hudKills').textContent = S.kills;
+  document.getElementById('hudArrests').textContent = S.arrests;
+  document.getElementById('hudCures').textContent = S.cures;
+  document.getElementById('hudControl').textContent = S.controlShown;
+  document.getElementById('hudRepText').textContent = repText();
+  var pct = 50 + S.rep * 5; // -10..10 -> 0..100
+  document.getElementById('repdot').style.left = 'calc(' + pct + '% - 7px)';
+}
+function addRecord(boss, result){ S.record.push({boss:boss, result:result}); }
+
+// ============================================================
+//  SCENES — Nohan's script
+//  type: 'story' (continue), 'choice' (options), 'fight', 'ending'
+// ============================================================
+var SCENES = {
+
+  /* ---------- 1. COLD OPEN ---------- */
+  open1: { type:'story', chapter:'Prologue — A Quiet Lunch', art:'🌇', bg:'linear-gradient(160deg,#3a2c12,#191426)',
+    text:[
+      "Rooftop. Golden hour. No mask, no suit drama — just Peter Parker, a sandwich, and the best view in the city.",
+      "For once, everything is peaceful. 🥪",
+      "<span class='speaker'>Peter:</span> \"Okay. Five quiet minutes. That's all I ask. Five—\""
+    ], next:'open2' },
+
+  open2: { type:'story', chapter:'Prologue — The Call', art:'📱', bg:'linear-gradient(160deg,#402020,#141426)',
+    text:[
+      "📱 <b>BRRRING!</b> The phone buzzes across the rooftop.",
+      "<b>CRIME REPORT — DOWNTOWN. ARMED ROBBERY IN PROGRESS.</b>",
+      "<span class='speaker'>Peter:</span> \"...Four minutes and thirty seconds. New record.\"",
+      "Mask on. Sandwich down. He leaps off the roof — and the city opens up below him. 🕸️"
+    ], next:'fight_thugs' },
+
+  fight_thugs: { type:'fight', fight:'thugs', chapter:'Downtown — Stop the Robbery!',
+    intro:"Stop the street thugs! 👊 Attack with J · 💨 Dodge with K", next:'kingpin_intro' },
+
+  venom_urge: { type:'story', chapter:'🖤 DLC — VENOM', art:'🖤', bg:'linear-gradient(160deg,#0a0a12,#1c1030)',
+    text:[
+      "The four hardest bosses are beaten. The city is quiet. Peter should feel proud.",
+      "Instead, he feels an <span class='red'>urge</span> — a pull under his ribs, like the red aura is pointing at something. Something dark is in his city.",
+      "Then his phone rings. 📱"
+    ], next:'venom_call' },
+
+  venom_call: { type:'story', chapter:'🖤 DLC — The Call', art:'📱', bg:'linear-gradient(160deg,#101018,#241038)',
+    text:[
+      "<span class='speaker'>Miles:</span> \"Pete — don't come home. There's something here. It's wearing a face like ours, but WRONG. It calls itself <b>VENOM</b>.\"",
+      "A crash. A roar that isn't human. The line shakes.",
+      "<span class='speaker'>Miles:</span> \"Pete, I tried to stop it — it's too strong — it's coming for—\"",
+      "<b>The call dies.</b> Miles is down. And the urge in Peter's chest turns into a compass: <span class='red'>that way. Now.</span>"
+    ], next:'venom_fight_scene' },
+
+  venom_fight_scene: { type:'fight', fight:'venom', chapter:'🖤 DLC — VENOM',
+    intro:"VENOM — 50,000 HP! 🖤 Deal 1,000 total damage to awaken 👑 SUPREME MODE (10 seconds — every hit 5,000 damage)! Save Miles!", next:'venom_mark' },
+
+  venom_mark: { type:'handler', fn:'venomBeaten' },
+
+  venom_after: { type:'story', chapter:'🖤 DLC — Aftermath', art:'🌅', bg:'linear-gradient(160deg,#2c2038,#101018)',
+    text:[
+      "Venom is beaten. The symbiote peels away into the dark, hissing Peter's name like a promise.",
+      "<span class='speaker'>Miles:</span> \"That gold light, Pete… that was YOU? Ten seconds at a time — and you held it. You actually held it.\"",
+      "But the aura is pointing again. The four bosses are back — <b>all of them at their absolute strongest</b>. One last test stands between Peter and owning the Supreme power for good."
+    ], next:'venom_done' },
+
+  venom_done: { type:'handler', fn:'toTitle' },
+
+  kingpin_intro: { type:'story', chapter:'Boss 1 — Trouble Rolls In', art:'🚚', bg:'linear-gradient(160deg,#2c2c3a,#101018)',
+    text:[
+      "The thugs drop fast. Too fast. Almost like they were just… the warm-up.",
+      "A black limo rolls to a stop. The door opens — and the street itself seems to get smaller.",
+      "<span class='speaker'>KINGPIN:</span> \"Spider-Man. You have cost me money. I intend to collect.\"",
+      "He cracks his knuckles. Each one sounds like a door slamming. This is not going to be a normal fight…"
+    ], next:'fight_kingpin' },
+
+  fight_kingpin: { type:'fight', fight:'kingpin', chapter:'BOSS 1 — KINGPIN',
+    intro:"KINGPIN! Watch for his charge! Something inside you is waking up… 🔴", next:'kingpin_choice' },
+
+  kingpin_choice: { type:'choice', chapter:'⚖️ The Choice — Kingpin', art:'🔴', bg:'linear-gradient(160deg,#4a1010,#180a10)',
+    text:[
+      "Kingpin is DOWN. The Super Mode is still burning — the <span class='red'>red aura</span> crackling, your hands shaking with power that wants MORE.",
+      "Sirens are coming. The police will be here in seconds. It's your call, Peter…"
+    ],
+    options:[
+      { label:"🕊️ Power down. Let him live — the police can have him.",
+        fx:{ arrests:1, rep:2 }, record:{boss:'Kingpin', result:'Arrested — handed to the police'}, next:'kingpin_spared' },
+      { label:"💀 Stay in Super Mode… and finish him.",
+        fx:{ kills:1, rep:-2, kingpinKilled:true }, record:{boss:'Kingpin', result:'Killed in Super Mode'}, next:'kingpin_killed' }
+    ] },
+
+  kingpin_spared: { type:'story', chapter:'Kingpin — Arrested', art:'🚓', bg:'linear-gradient(160deg,#14301c,#0c1420)',
+    text:[
+      "Peter forces the aura down, breath by breath, until his hands stop glowing.",
+      "The police swarm in and drag Kingpin away in chains built for a truck.",
+      "<span class='speaker'>Kingpin:</span> \"You… showed mercy? Hm. Interesting.\"",
+      "<span class='good'>The city sees it. Spider-Man stopped the Kingpin — and chose to be a hero about it.</span>"
+    ], next:'miles_choice' },
+
+  kingpin_killed: { type:'story', chapter:'Kingpin — Gone', art:'🌃', bg:'linear-gradient(160deg,#330d0d,#0c0c12)',
+    text:[
+      "The aura decides before Peter does. One blinding red flash — and it's over.",
+      "Kingpin is gone. Forever. The sirens arrive to a silent street and a Spider-Man staring at his own hands.",
+      "<span class='speaker'>Peter:</span> \"I… that was me. <i>I</i> did that. What IS this power?\"",
+      "<span class='red'>The city sees it too. And the city will remember.</span>"
+    ], next:'miles_choice' },
+
+  /* ---------- 3. MILES — THE CHOICE ---------- */
+  miles_choice: { type:'choice', chapter:'🕷️🕷️ Go To Miles', art:'🏙️', bg:'linear-gradient(160deg,#1c2a4a,#100f1c)',
+    text:[
+      "There's one person who might understand a power that won't listen: <b>Miles Morales</b>.",
+      "Peter swings across the city and lands on Miles' rooftop. His hands are still trembling. Miles looks up…"
+    ],
+    options:[
+      { label:"🤐 Hide it. Pretend this visit is about something else.",
+        fx:{}, next:'miles_hide' },
+      { label:"🤝 Tell him the truth. All of it.",
+        fx:{ trained:true }, next:'miles_truth' }
+    ] },
+
+  miles_hide: { type:'story', chapter:'The Secret', art:'🌫️', bg:'linear-gradient(160deg,#23232e,#101018)',
+    text:[
+      "<span class='speaker'>Peter:</span> \"Hey man. Just, uh… checking in. Patrol stuff. Nothing important.\"",
+      "Miles shrugs, easy and trusting. They talk about patrol routes. About pizza toppings. About nothing.",
+      "Then Peter webs away into the dark — the secret riding on his back, heavier than before.",
+      "<span class='red'>Miles never knows. No training. No control. Whatever happens next, Peter faces it alone.</span>"
+    ], next:'alone_train' },
+
+  miles_truth: { type:'story', chapter:'The Truth', art:'⚡', bg:'linear-gradient(160deg,#2e2450,#12101e)',
+    text:[
+      "<span class='speaker'>Peter:</span> \"Miles. I have a power I can't control once it activates. And if I have to use it… I will. Even if it scares me.\"",
+      "Miles doesn't flinch. He almost laughs — kindly.",
+      "<span class='speaker'>Miles:</span> \"Pete. When I first got my electric powers? I almost killed heroes AND villains — by accident. Nobody teaches you this stuff. It just… arrives.\"",
+      "<span class='speaker'>Miles:</span> \"But here's the law of it: <b>use it long enough, you can actually control it.</b> So you need to train with it. With me.\""
+    ], next:'spar_intro' },
+
+  alone_train: { type:'story', chapter:'Training Alone', art:'🏚️', bg:'linear-gradient(160deg,#26221c,#12100e)',
+    text:[
+      "An empty warehouse. Peter tries to call the power up gently, the way you'd coax a flame.",
+      "It answers like a bomb. Crates explode outward — the aura roars, refuses, and snaps off, leaving him on his knees in the wreckage.",
+      "<span class='speaker'>Peter:</span> \"Okay. Okay… not like that.\"",
+      "<span class='red'>Without Miles, there is no one to teach him. The power stays wild.</span>"
+    ], next:'lizard_intro_u' },
+
+  spar_intro: { type:'story', chapter:'Boss 2 — The Training', art:'🥊', bg:'linear-gradient(160deg,#14343a,#0e1420)',
+    text:[
+      "<b>BOSS 2 — MILES (SPARRING).</b> This is not a villain fight. This is family, full power, no holding back.",
+      "<span class='speaker'>Miles:</span> \"Rules: you come at me with everything — including the red stuff. I can take it. Probably.\" ⚡",
+      "<span class='speaker'>Peter:</span> \"And if it takes over?\"",
+      "<span class='speaker'>Miles:</span> \"Then I get to see what it really is. Ready when you are, Pete.\""
+    ], next:'fight_miles' },
+
+  fight_miles: { type:'fight', fight:'miles', chapter:'BOSS 2 — MILES (SPARRING)',
+    intro:"SPAR WITH MILES! He's too fast — you can't land a hit… something has to change!", next:'spar_outcome' },
+
+  // handler-resolved: spar_stop (spared Kingpin) or spar_hurt (killed Kingpin)
+  spar_outcome: { type:'handler', fn:'sparOutcome' },
+
+  spar_stop: { type:'story', chapter:'The Stop', art:'✋', bg:'linear-gradient(160deg,#3a3414,#14120c)',
+    text:[
+      "The aura TOOK him. Red lightning bent around Miles' strongest bolts — Peter was untouchable, unstoppable… and then, at the very edge, he felt the line — and STOPPED. On his own. Before anything serious.",
+      "Silence. Two Spider-Men breathing hard in the ruins of the training ground.",
+      "<span class='speaker'>Peter:</span> \"Miles. I'm sorry. I'm so sorry — it nearly— I almost—\"",
+      "<span class='speaker'>Miles:</span> \"But you stopped. Pete. <i>You</i> stopped it. That's the first rep of control there is.\"",
+      "<span class='good'>CONTROL: the power answered to Peter — once, when it mattered.</span>"
+    ], fx:{ control:'Trained 🔥' }, next:'lizard_intro' },
+
+  spar_hurt: { type:'story', chapter:'Too Late', art:'🩹', bg:'linear-gradient(160deg,#3d0f14,#140a0c)',
+    text:[
+      "The aura TOOK him. Red lightning bent around Miles' strongest bolts — and Peter reached for the stop… the way he'd reached for it with Kingpin, and found only the power's hunger there.",
+      "The stop came too late. Miles is down. Hurt. By Peter's own hands.",
+      "<span class='speaker'>Peter:</span> \"Miles — no no no — I'm sorry, I tried to stop, it wouldn't—\"",
+      "<span class='speaker'>Miles:</span> (through gritted teeth) \"…Still here, Pete. Still here. But that thing? It remembers being fed. Remember that.\"",
+      "<span class='red'>The spar is won, and it feels like losing. The apology lands heavy — because it has to.</span>"
+    ], fx:{ control:'Trained 🔥', milesHurt:true }, next:'lizard_intro' },
+
+  /* ---------- 5. BOSS 3 — THE LIZARD ---------- */
+  lizard_intro: { type:'story', chapter:'Boss 3 — Something in the Sewers', art:'🦎', bg:'linear-gradient(160deg,#10301a,#0a1410)',
+    text:[
+      "<b>BANG!</b> Across the city, a laboratory door explodes off its hinges — from the inside.",
+      "📱 Peter's phone lights up: <b>MASSIVE CREATURE LOOSE — DOCKS DISTRICT.</b>",
+      "He webs straight there, heart pounding. Scales. Claws. A tail like a falling tree.",
+      "<span class='speaker'>Peter:</span> \"The Lizard. Okay, big guy… let's do this.\""
+    ], next:'lizard_approach' },
+
+  lizard_approach: { type:'choice', chapter:'🦎 How Do You Fight Him?', art:'🌑', bg:'linear-gradient(160deg,#12291a,#0a100c)',
+    text:[
+      "Miles' training hums in Peter's bones. For the first time, the Super Mode is a <b>choice</b>, not an accident.",
+      "The Lizard is watching him. Waiting. How does this fight go?"
+    ],
+    options:[
+      { label:"🕸️ Fight clean. NO Super Mode — the whole fight, just me.",
+        fx:{}, next:'fight_lizard_clean' },
+      { label:"🔴 Use the Super Mode — controlled, calm, on purpose.",
+        fx:{}, next:'fight_lizard_super' }
+    ] },
+
+  fight_lizard_clean: { type:'fight', fight:'lizard_clean', chapter:'BOSS 3 — THE LIZARD (Clean)',
+    intro:"No Super Mode. Just you, your webs, and a very large lizard.", next:'lizard_escaped' },
+
+  lizard_escaped: { type:'story', chapter:'He Got Away', art:'🌊', bg:'linear-gradient(160deg,#1a2e3a,#0c1218)',
+    text:[
+      "Peter wins — battered, breathless, honest. The Lizard staggers back from the last web-line…",
+      "…and dives. A manhole. A splash. Gone into the dark water under the city.",
+      "<span class='speaker'>Peter:</span> \"Yeah. You run. I'll be here when you come back, big guy.\"",
+      "A clean win, with clean hands — but the Lizard is still out there."
+    ], fx:{}, record:{boss:'The Lizard', result:'Escaped into the sewers'}, next:'mysterio_intro' },
+
+  fight_lizard_super: { type:'fight', fight:'lizard_super', chapter:'BOSS 3 — THE LIZARD (Super Mode)',
+    intro:"Activate SUPER when the meter is full — and stay CALM. Calm, calm, calm…", next:'lizard_cure' },
+
+  lizard_cure: { type:'story', chapter:'The Cure', art:'💚', bg:'linear-gradient(160deg,#14401e,#0c1810)',
+    text:[
+      "Calm. Calm. Calm. The controlled aura doesn't rage — it <i>listens</i>. And inside the Super Mode, Peter finds something new: a power to <b>take madness out of people</b>.",
+      "He reaches out — and pulls the madness out of the Lizard like a splinter from the world.",
+      "The scales fall away. A man sits blinking in the wreckage. <b>Dr. Connors.</b> The Lizard is gone — for good.",
+      "And Connors looks down at his hands — <i>both</i> of them. The arm he lost, years ago… is back. Whole.",
+      "<span class='speaker'>Dr. Connors:</span> \"You… you gave me back my <i>life</i>.\""
+    ], fx:{ cures:1, rep:3 }, record:{boss:'The Lizard', result:'CURED — Dr. Connors restored'}, next:'realise' },
+
+  realise: { type:'story', chapter:'The Realisation', art:'🌅', bg:'linear-gradient(160deg,#3a2c50,#161226)',
+    text:[
+      "On the long swing home, it finally lands — the sentence Peter will carry forever:",
+      "<span class='speaker'>Peter:</span> \"<b>The power is not only for bad. It can also be used for good.</b>\"",
+      "The same red aura that terrified him… just healed a man everyone else would have fought.",
+      "He reaches for his phone. There's someone who needs to hear this."
+    ], next:'second_call' },
+
+  second_call: { type:'story', chapter:'📱 The Second Call', art:'📞', bg:'linear-gradient(160deg,#14304a,#0c1420)',
+    text:[
+      "<span class='speaker'>Peter:</span> \"Miles? The powers… they aren't actually that bad. I'm actually starting to control it. It <i>cured</i> him, Miles.\"",
+      "<span class='speaker'>Miles:</span> \"HA! I told you — <b>training is real.</b> When I first had these powers, I couldn't control them, and you couldn't either. But after training? We could finally control them.\"",
+      "<span class='speaker'>Miles:</span> \"Proud of you, Pete. Now — one more shadow over this city. You feel it too, right?\"",
+      "Peter does. Something fake is hanging over everything. Something with a smile made of glass…"
+    ], next:'mysterio_intro' },
+
+  lizard_intro_u: { type:'story', chapter:'Boss 3 — Something in the Sewers', art:'🦎', bg:'linear-gradient(160deg,#30101a,#140a10)',
+    text:[
+      "<b>BANG!</b> Across the city, a laboratory door explodes off its hinges — from the inside.",
+      "📱 Peter's phone lights up: <b>MASSIVE CREATURE LOOSE — DOCKS DISTRICT.</b>",
+      "He webs straight there, alone with a power he never learned to hold.",
+      "<span class='speaker'>Peter:</span> \"The Lizard. Okay. Okay… just don't— don't wake up, red stuff. Please.\""
+    ], next:'fight_lizard_u' },
+
+  fight_lizard_u: { type:'fight', fight:'lizard_u', chapter:'BOSS 3 — THE LIZARD',
+    intro:"Fight the Lizard! (Your Super meter is… unstable.)", next:'lizard_killed' },
+
+  lizard_killed: { type:'story', chapter:'What The Power Did', art:'🌑', bg:'linear-gradient(160deg,#2a0d12,#0e080a)',
+    text:[
+      "The fight was going fine. It was going FINE — until the Lizard's tail caught Peter across the ribs and the fear lit the fuse.",
+      "The aura erupted. No training. No control. No one who knew. It ended the fight the only way it knows how.",
+      "The Lizard will not hurt anyone ever again. Because there is no Lizard. And no Dr. Connors either. Not anymore.",
+      "<span class='speaker'>Peter:</span> (whispering) \"I didn't choose that. I DIDN'T CHOOSE THAT.\"",
+      "<span class='red'>But the city doesn't know that. With everything you kill, the more they hate.</span>"
+    ], fx:{ kills:1, rep:-3 }, record:{boss:'The Lizard', result:'Killed — the power erupted'}, next:'mysterio_intro' },
+
+  /* ---------- 6. BOSS 4 — MYSTERIO ---------- */
+  mysterio_intro: { type:'story', chapter:'Final Boss — The Smell of Smoke and Mirrors', art:'🎭', bg:'linear-gradient(160deg,#2c1440,#100a1c)',
+    text:[
+      "Green smoke pours over Times Square. Every screen flickers to the same grinning glass face.",
+      "<span class='speaker'>MYSTERIO:</span> \"SPIDER-MAN! Come and save them, hero! Come and save EVERYONE!\"",
+      "Screams, everywhere — a hundred disasters at once. Peter dives in…",
+      "…and his hands pass straight through a falling woman's arms. Through the fire. Through the screaming crowd. <b>None of it is real.</b>"
+    ], next:'mirror' },
+
+  mirror: { type:'story', chapter:'🪞 The Mirror', art:'🪞', bg:'linear-gradient(160deg,#1c1c30,#0c0c16)',
+    textDyn:'mirrorLines', next:'fight_mysterio' },
+
+  fight_mysterio: { type:'fight', fight:'mysterio', chapter:'FINAL BOSS — MYSTERIO',
+    intro:"MYSTERIO! Beware his copies — only the REAL one takes damage!", next:'mysterio_resolution' },
+
+  mysterio_resolution: { type:'handler', fn:'mysterioResolution' },
+
+  mysterio_arrested: { type:'story', chapter:'The Arrest', art:'🔮', bg:'linear-gradient(160deg,#10382a,#0a1812)',
+    text:[
+      "Peter doesn't swing at the man at all. Calm. Calm. Calm. The controlled Super Mode reaches out — and SHATTERS THE ILLUSIONS, all of them, like glass rain over Times Square.",
+      "And behind the broken illusions stands just a man in a fishbowl helmet, blinking in the sudden real light.",
+      "<span class='speaker'>Peter:</span> \"Show's over. The police can take it from here.\"",
+      "Mysterio is arrested — alive, whole, and furious about it."
+    ], fx:{ arrests:1, rep:2 }, record:{boss:'Mysterio', result:'Arrested — illusions shattered'}, next:'ending_good' },
+
+  mysterio_killed: { type:'story', chapter:'The Broken Illusion', art:'💔', bg:'linear-gradient(160deg,#380d18,#12060a)',
+    text:[
+      "The mirror showed him everything he'd done — and the power ROSE to meet it, the way it always rises when Peter is hurting.",
+      "The illusion broke. And this time, so did the man inside it. Mysterio doesn't walk away. Mysterio doesn't walk anywhere, ever again.",
+      "The green smoke clears over a silent square, and a thousand real faces stare up at Spider-Man — and look away.",
+      "<span class='red'>The city hates him now. Not worried. Not afraid. Forever.</span>"
+    ], fx:{ kills:1, rep:-4 }, record:{boss:'Mysterio', result:'Killed in the broken illusion'}, next:'ending_dark' },
+
+  ending_good: { type:'ending', ending:'hero', chapter:'🌟 ENDING — HERO OF THE CITY', art:'🌟', bg:'linear-gradient(160deg,#7a5c14,#2a2008)',
+    text:[
+      "Morning. The real kind — no smoke, no mirrors.",
+      "Kingpin in chains. A cured man having breakfast with both hands. A city that watched a terrifying power get carried, all the way, by a hero who chose people over it — every single time it counted.",
+      "<span class='speaker'>Miles:</span> \"Told you, Pete. Training is real. <i>You're</i> real. That's the whole secret.\"",
+      "Peter Parker finishes a sandwich on a rooftop. The phone will ring again. It always does.",
+      "<b>But this time, he's not afraid of what's in his hands. 🕷️</b>"
+    ] },
+
+  ending_dark: { type:'ending', ending:'hunted', chapter:'🌑 ENDING — HUNTED', art:'🌑', bg:'linear-gradient(160deg,#1a1a24,#060608)',
+    text:[
+      "The city hates him now — forever is a long time, and the city means it.",
+      "Posters come down. Windows close when he swings past. Miles calls, and calls, and the calls get shorter.",
+      "And high above the clouds, in a tower full of heroes, a meeting is held about him. The word used is <i>threat</i>. The sentence being discussed is: <b>go and stop him. Fully.</b>",
+      "The Avengers are thinking about coming for Spider-Man.",
+      "<b>The power was never the monster. But the city will never believe that now. 🕷️</b>"
+    ] }
+};
+
+// Dynamic mirror-scene lines (Boss 4) — the illusion shows the player their own record.
+function mirrorLines(){
+  var L = [];
+  L.push("The smoke closes in — and the illusions stop showing Peter the city. They start showing him <b>himself</b>. The madness and the goodness, side by side, at the same time.");
+  if (isGoodDominant()){
+    L.push("Connors — whole, laughing, shaking Peter's hand with both of his. The chained Kingpin. Every rescue, standing in golden light.");
+    L.push("And a voice — the realest thing in the whole fake world: <span class='speaker'>Miles:</span> \"<b>Pete… you're doing very good.</b>\"");
+    L.push("<span class='speaker'>Mysterio:</span> \"No no no — that's not the show! You're supposed to see the MONSTER!\"");
+    L.push("<span class='good'>But there is no monster in the mirror. There's a hero. And Peter smiles.</span>");
+  } else {
+    L.push("The reel starts. He can't look away. He <i>built</i> this reel, choice by choice.");
+    if (S.kingpinKilled) L.push("👑 <b>KINGPIN</b> — the red flash, again and again. Brutal. Final.");
+    if (S.lizardOutcome === 'killed' || hasRecord('The Lizard','Killed')) L.push("🦎 <b>THE LIZARD</b> — a man named Connors, erased by a power nobody taught Peter to hold.");
+    if (S.milesHurt) L.push("🕷️ <b>MILES</b> — on the ground. Hurt by the hands of his best friend. In this reel, the apology never quite lands.");
+    L.push("<span class='speaker'>Mysterio:</span> (delighted) \"OH, THERE he is! THERE'S the monster! I didn't create him, Spider-Man — I just brought the mirror!\"");
+    L.push("<span class='red'>Whatever you chose is whatever you see. And Peter is seeing badness.</span>");
+  }
+  L.push("The mirror cracks. Behind it: one fishbowl helmet, one grinning man. <b>FINAL BOSS — MYSTERIO.</b>");
+  return L;
+}
+function hasRecord(boss, substr){
+  for (var i=0;i<S.record.length;i++){ if (S.record[i].boss===boss && S.record[i].result.indexOf(substr)===0) return true; }
+  return false;
+}
+
+// Handlers for branch-resolving pseudo-scenes
+var HANDLERS = {
+  sparOutcome: function(){
+    if (S.kingpinKilled) go('spar_hurt'); else go('spar_stop');
+  },
+  mysterioResolution: function(){
+    if (isGoodDominant()) go('mysterio_arrested'); else go('mysterio_killed');
+  },
+  venomBeaten: function(){
+    if (!PROG.venomDone) { PROG.venomDone = true; UP.pts += 4; saveUP(); savePROG(); }
+    go('venom_after');
+  },
+  toTitle: function(){ rushMode = false; gauntletMode = false; rematchMode = false; showBox('titleBox'); renderUps(); renderModes(); }
+};
+
+// ============================================================
+//  SCENE ENGINE
+// ============================================================
+var cur = null;           // current scene id
+var ABIL = { web:false, heal:false, super:false }; // unlocked at Boss 1
+
+function clampRep(){ S.rep = Math.max(-10, Math.min(10, S.rep)); }
+function applyFx(fx){
+  if (!fx) return;
+  if (fx.kills) S.kills += fx.kills;
+  if (fx.arrests) S.arrests += fx.arrests;
+  if (fx.cures) S.cures += fx.cures;
+  if (fx.rep) { S.rep += fx.rep; clampRep(); }
+  if (fx.kingpinKilled) S.kingpinKilled = true;
+  if (fx.milesHurt) S.milesHurt = true;
+  if (fx.trained) { S.trained = true; S.controlShown = 'Training… ⚡'; }
+  if (fx.control) S.controlShown = fx.control;
+  updateHUD();
+}
+// filing fixes: control label on the hide track
+SCENES.miles_hide.fx = { control:'Untrained 🌫️' };
+
+function showBox(id){
+  ['titleBox','sceneBox','fightBox','roamBox','rushBox'].forEach(function(b){
+    document.getElementById(b).style.display = (b===id) ? 'block' : 'none';
+  });
+}
+function el(id){ return document.getElementById(id); }
+
+function go(id){
+  if (!roamBypass && ROAM_GATES[id]) { enterRoam(id); return; }
+  cur = id;
+  var sc = SCENES[id];
+  if (!sc) { console.error('Missing scene', id); return; }
+  stopFight();
+  if (sc.type === 'handler') { HANDLERS[sc.fn](); return; }
+  if (sc.type === 'fight') { startFight(sc); return; }
+  // story / choice / ending: apply one-time scene fx + record
+  if (!sc._applied) {
+    sc._applied = true;
+    applyFx(sc.fx);
+    if (sc.record) addRecord(sc.record.boss, sc.record.result);
+    if (sc.type === 'ending') saveEnding(sc.ending);
+    updateHUD();
+  }
+  renderStory(sc);
+}
+
+function sceneLines(sc){
+  if (sc.textDyn === 'mirrorLines') return mirrorLines();
+  return sc.text || [];
+}
+
+function renderStory(sc){
+  showBox('sceneBox');
+  el('artPanel').textContent = sc.art || '🕷️';
+  el('artPanel').style.background = sc.bg || '#222';
+  el('chapterTag').textContent = sc.chapter || '';
+  var lines = sceneLines(sc);
+  el('sceneText').innerHTML = lines.map(function(t){ return '<p>'+t+'</p>'; }).join('');
+  var row = el('btnRow'); row.innerHTML = '';
+  if (sc.type === 'choice') {
+    sc.options.forEach(function(opt, i){
+      var b = document.createElement('button');
+      b.className = 'bigbtn'; b.innerHTML = opt.label;
+      b.onclick = function(){ choose(i); };
+      row.appendChild(b);
+    });
+  } else if (sc.type === 'ending') {
+    var recap = document.createElement('div');
+    recap.id = 'recapBox';
+    var html = '<b>📋 THE RECORD OF THIS RUN:</b><br>';
+    S.record.forEach(function(r){ html += '• <b>' + r.boss + ':</b> ' + r.result + '<br>'; });
+    html += '<br>⚖️ Kills: <b>' + S.kills + '</b> · Arrests: <b>' + S.arrests + '</b> · Cures: <b>' + S.cures + '</b>';
+    html += '<br>🏙️ The city\u2019s verdict: <b>' + repText() + '</b>';
+    recap.innerHTML = html;
+    el('sceneText').appendChild(recap);
+    var again = document.createElement('button');
+    again.className = 'bigbtn contbtn'; again.textContent = '🔁 PLAY AGAIN';
+    again.onclick = function(){ window.location.reload(); };
+    row.appendChild(again);
+  } else {
+    var c = document.createElement('button');
+    c.className = 'bigbtn contbtn'; c.textContent = 'CONTINUE ▶';
+    c.onclick = function(){ go(sc.next); };
+    row.appendChild(c);
+  }
+  window.scrollTo(0,0);
+}
+
+function choose(i){
+  var sc = SCENES[cur];
+  if (!sc || sc.type !== 'choice') return;
+  var opt = sc.options[i];
+  applyFx(opt.fx);
+  if (opt.record) addRecord(opt.record.boss, opt.record.result);
+  updateHUD();
+  go(opt.next);
+}
+
+function startGame(){
+  S = newState();
+  Object.keys(SCENES).forEach(function(k){ delete SCENES[k]._applied; });
+  ABIL = { web:false, heal:false, super:false };
+  bossWins = 0;
+  thugWins = 0;
+  rushMode = false; gauntletMode = false; rematchMode = false;
+  resetRoam();
+  updateHUD();
+  go('open1');
+}
+
+// ============================================================
+//  FIGHT ENGINE — simple, generous, robust arena combat
+// ============================================================
+var cv, ctx, W = 900, H = 500;
+var fightActive = false, rafId = null, lastTs = 0;
+var curFightScene = null, fightKind = '';
+var bossWins = 0; // Nohan's escalation rule (Nov 1): every boss beaten, BOTH sides grow stronger
+var thugWins = 0; // Nohan's thug-growth rule (Nov 1): EVERY thug defeated makes Peter a little stronger — HP, damage, SUPER charge and SUPER damage
+
+// ============================================================
+//  NOHAN'S ENDGAME LADDER (Nov 1, 2026): Boss Rush → Hardest Gauntlet
+//  → Venom DLC → Final Rematch → SUPREME everywhere. Plus the shared
+//  UPGRADES system (points earned in every mode, spent once, work everywhere).
+// ============================================================
+var UPKEY = 'redAuraUpgrades';
+var UP = { pts:0, hp:0, hit:0, heal:0, sup:0, spd:0 };
+try { var upSv = JSON.parse(localStorage.getItem(UPKEY) || 'null'); if (upSv) { for (var uk in UP) if (typeof upSv[uk] === 'number') UP[uk] = upSv[uk]; } } catch (e) {}
+function saveUP(){ try { localStorage.setItem(UPKEY, JSON.stringify(UP)); } catch (e) {} }
+var PROGKEY = 'redAuraProgress';
+var PROG = { rushDone:false, gauntletDone:false, venomDone:false, rematchDone:false, supremeFree:false };
+try { var pgSv = JSON.parse(localStorage.getItem(PROGKEY) || 'null'); if (pgSv) { for (var pk in PROG) if (typeof pgSv[pk] === 'boolean') PROG[pk] = pgSv[pk]; } } catch (e) {}
+function savePROG(){ try { localStorage.setItem(PROGKEY, JSON.stringify(PROG)); } catch (e) {} }
+var RUSHBESTKEY = 'redAuraRushBest';
+var rushBest = { cycle:0, step:-1 };
+try { var rbSv = JSON.parse(localStorage.getItem(RUSHBESTKEY) || 'null'); if (rbSv && typeof rbSv.cycle === 'number') rushBest = rbSv; } catch (e) {}
+var rushMode = false, rushStep = 0, rushCycle = 1;
+var gauntletMode = false, gauntletStep = 0;
+var rematchMode = false, rematchStep = 0;
+var brawlMode = false; // Miles fights as a straight brawl (no spar script) in the hardest tiers
+var MODE_ORDER = ['kingpin', 'miles', 'lizard_super', 'mysterio'];
+var MODE_NAMES = { kingpin:'👑 KINGPIN', miles:'⚡ MILES', lizard_super:'🦎 THE LIZARD', mysterio:'🎭 MYSTERIO' };
+function computeSuperRate(){ return 0.85 + Math.min(0.45, 0.03 * thugWins) + 0.05 * UP.sup; }
+var UP_DEFS = [
+  { k:'hp',   icon:'❤️', name:'+25 Max Health' },
+  { k:'hit',  icon:'👊', name:'+3 Hit Damage' },
+  { k:'sup',  icon:'🔴', name:'SUPER: faster charge, +2 damage' },
+  { k:'heal', icon:'🩹', name:'+1 Heal every fight' },
+  { k:'spd',  icon:'⚡', name:'+Speed' }
+];
+function upRowsHTML(){ return UP_DEFS.map(function(d){ return '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin:6px 0;"><span style="text-align:left;">' + d.icon + ' ' + d.name + ' <span style="color:#8fd3ff;">(owned: ' + UP[d.k] + ')</span></span><button class="upbuy" data-up="' + d.k + '" style="padding:6px 12px;border-radius:8px;font-weight:bold;cursor:pointer;">BUY — 1 pt</button></div>'; }).join(''); }
+function renderUps(){
+  var p1 = el('upPts'), p2 = el('upPts2');
+  if (p1) p1.textContent = 'Points: ' + UP.pts;
+  if (p2) p2.textContent = 'Points: ' + UP.pts;
+  var r1 = el('upRows'), r2 = el('upRows2');
+  if (r1) r1.innerHTML = upRowsHTML();
+  if (r2) r2.innerHTML = upRowsHTML();
+  Array.prototype.forEach.call(document.querySelectorAll('.upbuy'), function(b){
+    b.disabled = UP.pts < 1;
+    b.onclick = function(){ buyUpgrade(b.getAttribute('data-up')); };
+  });
+}
+function buyUpgrade(k){ if (UP.pts < 1 || UP[k] === undefined) return; UP.pts--; UP[k]++; saveUP(); renderUps(); }
+function storyDone(){ try { return Object.keys(loadEndings()).length > 0; } catch (e) { return false; } }
+function renderModes(){
+  var rb = el('rushBtn'); if (rb) { var lk = !storyDone(); rb.innerHTML = lk ? '🔒 &nbsp;BOSS RUSH — finish the story first' : '👑 &nbsp;BOSS RUSH'; rb.disabled = lk; }
+  var gb = el('gauntletBtn'); if (gb) { var gl2 = !PROG.rushDone; gb.innerHTML = gl2 ? '🔒 &nbsp;HARDEST GAUNTLET — beat Boss Rush Cycle 5' : '🔥 &nbsp;HARDEST GAUNTLET — all 10,000 HP, NO Super Mode'; gb.disabled = gl2; }
+  var vb = el('venomBtn'); if (vb) { var vl = !PROG.gauntletDone; vb.innerHTML = vl ? '🔒 &nbsp;DLC: VENOM — beat the Hardest Gauntlet' : (PROG.venomDone ? '🖤 &nbsp;DLC: VENOM — fight him again!' : '🖤 &nbsp;DLC: VENOM — Miles is calling…'); vb.disabled = vl; }
+  var mb = el('rematchBtn'); if (mb) { var ml2 = !PROG.venomDone; mb.innerHTML = ml2 ? '🔒 &nbsp;FINAL REMATCH — beat Venom first' : (PROG.supremeFree ? '👑 &nbsp;FINAL REMATCH — cleared! Supreme is yours' : '🔥 &nbsp;FINAL REMATCH — 10,000 HP, harder hits'); mb.disabled = ml2; }
+  var ps = el('progStatus'); if (ps) ps.textContent = [storyDone() ? '📖 Story ✔' : '📖 Story', PROG.rushDone ? '👑 Rush ✔' : '👑 Rush', PROG.gauntletDone ? '🔥 Gauntlet ✔' : '🔥 Gauntlet', PROG.venomDone ? '🖤 Venom ✔' : '🖤 Venom', PROG.supremeFree ? '👑 SUPREME EVERYWHERE' : '👑 Supreme 🔒'].join(' · ');
+  var rbst = el('rushBest'); if (rbst) rbst.textContent = rushBest.cycle ? ('🏆 Rush best: Cycle ' + rushBest.cycle + ', boss ' + (rushBest.step + 1) + ' of 4') : '';
+}
+function ensureRun(){ if (!S) S = newState(); ABIL.web = true; ABIL.heal = true; ABIL.super = true; }
+function startRush(){ ensureRun(); rushMode = true; gauntletMode = false; rematchMode = false; rushStep = 0; rushCycle = 1; startRushBoss(); }
+function startGauntlet(){ ensureRun(); gauntletMode = true; rushMode = false; rematchMode = false; gauntletStep = 0; startGauntletBoss(); }
+function startRematch(){ ensureRun(); rematchMode = true; rushMode = false; gauntletMode = false; rematchStep = 0; startRematchBoss(); }
+function startRushBoss(){ var k = MODE_ORDER[rushStep]; startFight({ fight:k, chapter:'👑 BOSS RUSH', intro:'👑 BOSS RUSH — Cycle ' + rushCycle + ' · Boss ' + (rushStep + 1) + ' of 4: ' + MODE_NAMES[k] + '!', next:null }); }
+function startGauntletBoss(){ var k = MODE_ORDER[gauntletStep]; startFight({ fight:k, chapter:'🔥 HARDEST GAUNTLET', intro:'🔥 HARDEST — ' + MODE_NAMES[k] + ' · 10,000 HP · 🚫 NO SUPER MODE — skill and upgrades only!', next:null }); }
+function startRematchBoss(){ var k = MODE_ORDER[rematchStep]; startFight({ fight:k, chapter:'🔥 FINAL REMATCH', intro:'🔥 FINAL REMATCH — ' + MODE_NAMES[k] + ' · 10,000 HP · hitting harder than ever!', next:null }); }
+function modeBossDown(mode){
+  var beaten = fightKind, pts = mode === 'rush' ? 1 : 2;
+  UP.pts += pts; saveUP();
+  if (mode === 'rush') {
+    if (rushCycle > rushBest.cycle || (rushCycle === rushBest.cycle && rushStep > rushBest.step)) { rushBest = { cycle: rushCycle, step: rushStep }; try { localStorage.setItem(RUSHBESTKEY, JSON.stringify(rushBest)); } catch (e) {} }
+    var cleared = rushStep === 3;
+    if (cleared && rushCycle >= 5 && !PROG.rushDone) { PROG.rushDone = true; savePROG(); }
+    el('rushTitle').textContent = cleared ? ('👑 CYCLE ' + rushCycle + ' CLEARED!' + (rushCycle >= 5 ? ' 🏆 HARDEST RUSH BEATEN!' : '')) : '👑 BOSS DOWN!';
+    el('rushText').innerHTML = (cleared ? 'All four bosses beaten this cycle!' : MODE_NAMES[beaten] + ' is down! Next: ' + MODE_NAMES[MODE_ORDER[rushStep + 1]] + '.') + '<br>⬆️ <b>+' + pts + ' Upgrade Point</b> — you have ' + UP.pts + '.';
+    el('rushNextBtn').innerHTML = cleared ? '▶ &nbsp;CYCLE ' + (rushCycle + 1) : '▶ &nbsp;NEXT BOSS';
+    if (cleared) { rushStep = 0; rushCycle++; } else { rushStep++; }
+  } else if (mode === 'gauntlet') {
+    var gdone = gauntletStep === 3;
+    el('rushTitle').textContent = gdone ? '👑 THE HARDEST GAUNTLET — BEATEN!' : '🔥 HARDEST BOSS DOWN!';
+    el('rushText').innerHTML = (gdone ? 'All four beaten at 10,000 HP with NO Super Mode. Peter feels a strange urge… and his phone is ringing. 📱 The Venom DLC waits on the title screen!' : MODE_NAMES[beaten] + ' falls! Next: ' + MODE_NAMES[MODE_ORDER[gauntletStep + 1]] + ' — 10,000 HP.') + '<br>⬆️ <b>+' + pts + ' Upgrade Points</b> — you have ' + UP.pts + '.';
+    el('rushNextBtn').innerHTML = gdone ? '▶ &nbsp;FINISH' : '▶ &nbsp;NEXT HARDEST BOSS';
+    if (gdone) { PROG.gauntletDone = true; savePROG(); gauntletMode = false; } else { gauntletStep++; }
+  } else {
+    var rdone = rematchStep === 3;
+    el('rushTitle').textContent = rdone ? '👑 SUPREME MODE — UNLOCKED EVERYWHERE!' : '🔥 REMATCH BOSS DOWN!';
+    el('rushText').innerHTML = (rdone ? 'All four beaten at their strongest. The Supreme power is YOURS now — free roam, story, Boss Rush, Venom… anywhere. 👑' : MODE_NAMES[beaten] + ' falls! Next: ' + MODE_NAMES[MODE_ORDER[rematchStep + 1]] + ' — 10,000 HP, hitting even harder.') + '<br>⬆️ <b>+' + pts + ' Upgrade Points</b> — you have ' + UP.pts + '.';
+    el('rushNextBtn').innerHTML = rdone ? '▶ &nbsp;FINISH' : '▶ &nbsp;NEXT BOSS';
+    if (rdone) { PROG.rematchDone = true; PROG.supremeFree = true; savePROG(); rematchMode = false; } else { rematchStep++; }
+  }
+  showBox('rushBox');
+  renderUps(); renderModes();
+}
+var P = null;              // player
+var foes = [];             // enemies
+var projs = [];            // projectiles
+var pops = [];             // floating texts
+var parts = [];            // particles
+var keysHeld = {};
+var actQ = {};             // one-shot actions
+var msgT = 0, msgText = '';
+var sparPhase = 0, sparTimer = 0, eruptT = -1, fightTime = 0;
+var blocks = [];
+(function makeBlocks(){
+  var seed = 7;
+  function rnd(){ seed = (seed * 16807) % 2147483647; return seed / 2147483647; }
+  for (var i=0;i<26;i++) blocks.push({ x: rnd()*W, y: rnd()*H, w: 30+rnd()*70, h: 20+rnd()*46, a: 0.05+rnd()*0.08 });
+})();
+
+function setMsg(t, secs){ msgText = t; msgT = secs || 2.5; var m = document.getElementById('fightMsg'); if (m) m.textContent = t; }
+function popup(x, y, text, color){ pops.push({x:x, y:y, text:text, t:1.4, color:color||'#ffd75e'}); }
+function burst(x, y, color, n){ for (var i=0;i<(n||8);i++){ var a = Math.random()*6.283, s = 40+Math.random()*120; parts.push({x:x,y:y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,t:0.5,color:color}); } }
+
+var FIGHTS = {
+  thugs:        { label:'🥷 STREET THUGS', make:function(){ return [mkFoe('thug',200,150), mkFoe('thug',700,140), mkFoe('thug',450,90)]; } },
+  kingpin:      { label:'👑 KINGPIN',      make:function(){ return [mkFoe('kingpin',620,250)]; } },
+  miles:        { label:'⚡ MILES (SPAR)', make:function(){ return [mkFoe('miles',620,250)]; } },
+  lizard_clean: { label:'🦎 THE LIZARD',   make:function(){ return [mkFoe('lizard',620,250)]; } },
+  lizard_super: { label:'🦎 THE LIZARD',   make:function(){ return [mkFoe('lizard',620,250)]; } },
+  lizard_u:     { label:'🦎 THE LIZARD',   make:function(){ return [mkFoe('lizard',620,250)]; } },
+  mysterio:     { label:'🎭 MYSTERIO',     make:function(){ return [mkFoe('mysterio',620,200)]; } },
+  venom:        { label:'🖤 VENOM',        make:function(){ return [mkFoe('venom',620,250)]; } },
+  street:       { label:'🥷 STREET THUG',  make:function(){
+    // Nohan's street enemies (Nov 1): strength climbs the SAME ladder as the bosses (bossWins).
+    var t = bossWins, n = 1 + (t >= 2 ? 1 : 0) + (t >= 4 ? 1 : 0), out = [];
+    FIGHTS.street.label = t >= 4 ? '☀️ ELITE HUNTER' : t >= 3 ? '🦹 ARMORED BRUTE' : t >= 2 ? '🦹 TOUGH THUG' : '🥷 STREET THUG';
+    for (var i = 0; i < n; i++) { var f = mkFoe('thug', 620, 200 + i * 110);
+      f.max = 30 + 26 * t; f.hp = f.max; f.dmg = 5 + 2 * t; f.speed = 105 + 6 * t;
+      if (t >= 2) f.emoji = '🦹'; if (t >= 4) f.emoji = '☀️';
+      out.push(f); }
+    return out; } }
+};
+function mkFoe(kind, x, y){
+  var base = { kind:kind, x:x, y:y, atkCd:1+Math.random(), windup:0, stun:0, slow:0, flash:0,
+               chargeT:2.5, chargeState:0, stateT:0, chargeTx:0, chargeTy:0, teleT:3, boltT:2, fake:false, wob:Math.random()*6 };
+  if (kind==='thug')    return Object.assign(base, { hp:36, max:36, r:24, speed:118, dmg:6, emoji:'🥷', ring:'#8d9bb5' });
+  if (kind==='kingpin') return Object.assign(base, { hp:300, max:300, r:40, speed:62, dmg:13, emoji:'🕴️', ring:'#ffd75e' });
+  if (kind==='miles')   return Object.assign(base, { hp:340, max:340, r:26, speed:172, dmg:5, emoji:'🕷️', ring:'#b388ff' });
+  if (kind==='lizard')  return Object.assign(base, { hp:260, max:260, r:32, speed:104, dmg:11, emoji:'🦎', ring:'#66bb6a' });
+  if (kind==='mysterio')return Object.assign(base, { hp:240, max:240, r:28, speed:96, dmg:9, emoji:'🎭', ring:'#4db6ac' });
+  if (kind==='decoy')   return Object.assign(base, { hp:1, max:1, r:28, speed:40, dmg:0, emoji:'🎭', ring:'#4db6ac', fake:true });
+  if (kind==='venom')   return Object.assign(base, { hp:50000, max:50000, r:38, speed:126, dmg:200, emoji:'🖤', ring:'#ce93d8' });
+  return base;
+}
+
+function startFight(scene){
+  curFightScene = scene; fightKind = scene.fight;
+  showBox('fightBox');
+  cv = document.getElementById('cv'); ctx = cv.getContext('2d');
+  // Boss 1 unlocks the new powers (Nohan: heal, web-up, super wake during Kingpin)
+  if (fightKind === 'kingpin' && !ABIL.super) {
+    ABIL.web = true; ABIL.heal = true; ABIL.super = true;
+    setTimeout(function(){ setMsg('✨ NEW POWERS! 🩹 Heal (H) · 🕸️ Web-Up (L) · 🔴 SUPER charges as you deal damage!', 5); }, 2600);
+  }
+  P = { x:220, y:250, r:26, hp:100, max:100, speed:215, atkCd:0, dodgeT:0, dodgeCd:0, webCd:0,
+        healCharges:2, superMeter:0, superT:0, flash:0, face:1, stunT:0 };
+  if (fightKind === 'lizard_super') P.superMeter = 55;
+  foes = FIGHTS[fightKind].make();
+  // NOHAN'S ESCALATION RULE (Nov 1, 2026): every boss fight the enemies get stronger — and Peter gets stronger too.
+  var BOSS_ORDER = { kingpin:1, miles:2, lizard_clean:3, lizard_super:3, lizard_u:3, mysterio:4 };
+  var bord = BOSS_ORDER[fightKind] || 0;
+  P.atkBonus = 2 * bossWins + thugWins + 3 * UP.hit;
+  P.superBonus = Math.min(15, thugWins) + 2 * UP.sup;
+  P.superRate = computeSuperRate() * (PROG.supremeFree ? 2 : 1);
+  P.healCharges = 2 + UP.heal;
+  P.speed = 215 + 8 * UP.spd;
+  P.max = 100 + 20 * bossWins + 4 * thugWins + 25 * UP.hp; P.hp = P.max;
+  P.noSuper = false; P.supremeActive = false; P.supremeCharge = 0;
+  if (bord > 1) { var hm = 1 + 0.25 * (bord - 1), dm = 1 + 0.15 * (bord - 1);
+    foes.forEach(function(f){ if (!f.fake) { f.max = Math.round(f.max * hm); f.hp = f.max; f.dmg = Math.round(f.dmg * dm); } }); }
+  // MODE OVERRIDES — Nohan's endgame ladder: exact designer numbers for the hardest tiers.
+  if (gauntletMode) {
+    var GT = { kingpin:{hp:10000,dmg:250}, miles:{hp:10000,dmg:500}, lizard_super:{hp:10000,dmg:750}, mysterio:{hp:10000,dmg:1000} };
+    var gt2 = GT[fightKind];
+    foes.forEach(function(f){ if (!f.fake && gt2) { f.max = gt2.hp; f.hp = gt2.hp; f.dmg = gt2.dmg; } });
+    P.noSuper = true; P.superMeter = 0;
+    P.max = Math.max(P.max, 1000); P.hp = P.max;
+  } else if (rematchMode) {
+    var RT = { kingpin:{hp:10000,dmg:300}, miles:{hp:10000,dmg:600}, lizard_super:{hp:10000,dmg:900}, mysterio:{hp:10000,dmg:1200} };
+    var rt2 = RT[fightKind];
+    foes.forEach(function(f){ if (!f.fake && rt2) { f.max = rt2.hp; f.hp = rt2.hp; f.dmg = rt2.dmg; } });
+    P.max = Math.max(P.max, 1000); P.hp = P.max;
+  } else if (rushMode) {
+    var RAW = { kingpin:300, miles:340, lizard_super:260, mysterio:240 };
+    var RCAP = { kingpin:1000, miles:2500, lizard_super:4000, mysterio:5000 };
+    var rcap2 = RCAP[fightKind], rcyc2 = Math.min(rushCycle, 5);
+    foes.forEach(function(f){ if (!f.fake && rcap2) { var tgt2 = Math.round(RAW[fightKind] + (rcap2 - RAW[fightKind]) * (rcyc2 - 1) / 4); f.max = tgt2; f.hp = tgt2; f.dmg = Math.round(f.dmg * (1 + 0.35 * (rcyc2 - 1))); } });
+  }
+  if (fightKind === 'venom') { P.max = Math.max(P.max, 1000); P.hp = P.max; }
+  brawlMode = (fightKind === 'miles' && (gauntletMode || rematchMode));
+  if (bord >= 1) { setTimeout(function(){ setMsg('⚔️ BOSS ' + bord + ' — this enemy is stronger than the last… but so is Peter! ❤️ HP ' + P.max + ' · 👊 Hit ' + (9 + P.atkBonus) + (bossWins ? ' · Bosses beaten: ' + bossWins : ''), 3.6); }, 4800); }
+  projs = []; pops = []; parts = [];
+  sparPhase = 0; sparTimer = 0; eruptT = -1; fightTime = 0;
+  document.getElementById('bossLabel').textContent = FIGHTS[fightKind].label;
+  setMsg(scene.intro || '', 4);
+  fightActive = true; lastTs = 0;
+  cancelAnimationFrame(rafId);
+  rafId = requestAnimationFrame(loop);
+}
+function stopFight(){ fightActive = false; if (rafId) cancelAnimationFrame(rafId); rafId = null; }
+function endFight(win){
+  stopFight();
+  if (win) {
+    if (fightKind === 'street') { exitStreetFight(); return; }
+    if (rushMode) { bossWins++; modeBossDown('rush'); return; }
+    if (gauntletMode) { bossWins++; modeBossDown('gauntlet'); return; }
+    if (rematchMode) { bossWins++; modeBossDown('rematch'); return; }
+    if ({ kingpin:1, miles:1, lizard_clean:1, lizard_super:1, lizard_u:1, mysterio:1, venom:1 }[fightKind]) { bossWins++; UP.pts++; saveUP(); }
+    go(curFightScene.next);
+  }
+}
+function winCurrentFight(){ if (fightActive) endFight(true); }
+
+function foeTotalHp(){ var t=0,m=0; foes.forEach(function(f){ if(!f.fake){ t+=Math.max(0,f.hp); m+=f.max; } }); return m? t/m : 0; }
+
+function hurtPlayer(dmg, sx, sy){
+  if (P.dodgeT > 0) { popup(P.x, P.y-44, '💨 DODGED!', '#9be7ff'); return; }
+  if (P.superT > 0) { popup(P.x, P.y-44, '🌀 SENSE DODGE!', '#ff8a80'); burst(P.x, P.y, '#ff5252', 6); return; }
+  P.hp -= dmg; P.flash = 0.25;
+  burst(P.x, P.y, '#ef9a9a', 8);
+  if (P.hp <= 0) {
+    P.hp = 0;
+    setMsg('💥 DOWN! …but Spider-Man ALWAYS gets back up!', 2);
+    fightActive = false;
+    setTimeout(function(){ if (curFightScene) startFight(curFightScene); }, 1500);
+  }
+}
+function damageFoe(f, dmg, isSuper){
+  if (f.fake) { burst(f.x, f.y, '#80cbc4', 10); popup(f.x, f.y-40, '🎭 FAKE!', '#80cbc4'); f.hp = 0; return; }
+  if (f.hiddenT > 0) { popup(f.x, f.y-44, '💨 GONE!', '#b0bec5'); return; }
+  if (f.shieldT > 0) { popup(f.x, f.y-44, '🛡️ SHIELD BLOCKED!', '#ffd75e'); burst(f.x, f.y, '#ffd75e', 6); return; }
+  if (f.kind === 'miles' && sparPhase === 0 && !brawlMode) {
+    if (Math.random() < 0.93) { popup(f.x, f.y-44, '⚡ TOO FAST!', '#d1c4e9'); return; }
+    dmg = 1;
+  }
+  var hpBefore = f.hp;
+  f.hp -= dmg; f.flash = 0.18;
+  burst(f.x, f.y, isSuper ? '#ff5252' : '#ffe082', isSuper ? 12 : 6);
+  if (!P.noSuper && !(P.supremeActive && P.superT > 0)) P.superMeter = Math.min(100, P.superMeter + dmg * (P.superRate || 0.85));
+  if (hpBefore > 0 && f.hp <= 0 && f.kind === 'thug') {
+    // NOHAN'S THUG-GROWTH RULE: a little stronger in EVERY way, every single time.
+    thugWins++;
+    P.max += 4; P.hp = Math.min(P.max, P.hp + 4);
+    P.atkBonus = (P.atkBonus || 0) + 1;
+    P.superBonus = Math.min(15, thugWins) + 2 * UP.sup;
+    P.superRate = computeSuperRate() * (PROG.supremeFree ? 2 : 1);
+    setMsg('⬆️ THUG DOWN! Peter grows a little — ❤️ ' + P.max + ' HP · 👊 Hit ' + (9 + P.atkBonus) + ' · 🔴 SUPER charges faster + hits harder! (Thugs beaten: ' + thugWins + ')', 1.8);
+  }
+  // NOHAN'S SUPREME TRIGGER: in the Venom fight and the Final Rematch, every 1,000 damage
+  // dealt awakens SUPREME MODE for 10 seconds — every hit does 5,000 damage.
+  if ((fightKind === 'venom' || rematchMode) && !P.noSuper) {
+    P.supremeCharge = (P.supremeCharge || 0) + dmg;
+    if (P.supremeCharge >= 1000 && P.superT <= 0) {
+      P.supremeCharge = 0; P.superT = 10; P.supremeActive = true;
+      setMsg('👑 SUPREME MODE! 10 seconds — every hit does 5,000 damage!', 2.6);
+      popup(P.x, P.y-56, '👑 SUPREME!', '#ffd83d'); burst(P.x, P.y, '#ffd83d', 26);
+    }
+  }
+  if (f.kind === 'miles' && sparPhase === 2 && f.hp <= f.max * 0.3) { endFight(true); }
+}
+function nearestFoe(){
+  var best = null, bd = 1e9;
+  foes.forEach(function(f){ if (f.hp > 0) { var d = Math.hypot(f.x-P.x, f.y-P.y); if (d < bd) { bd = d; best = f; } } });
+  return { f: best, d: bd };
+}
+
+function loop(ts){
+  if (!fightActive) return;
+  rafId = requestAnimationFrame(loop);
+  var dt = Math.min(0.033, lastTs ? (ts - lastTs)/1000 : 0.016); lastTs = ts;
+  update(dt); draw();
+}
+
+function update(dt){
+  fightTime += dt;
+  if (msgT > 0) { msgT -= dt; if (msgT <= 0) document.getElementById('fightMsg').textContent = ''; }
+  // --- timers
+  P.atkCd = Math.max(0, P.atkCd - dt); P.dodgeCd = Math.max(0, P.dodgeCd - dt);
+  P.webCd = Math.max(0, P.webCd - dt); P.flash = Math.max(0, P.flash - dt);
+  if (P.superT > 0) P.superT = Math.max(0, P.superT - dt);
+  if (P.superT <= 0) P.supremeActive = false;
+  if (P.stunT > 0) P.stunT = Math.max(0, P.stunT - dt);
+  if (P.dodgeT > 0) P.dodgeT = Math.max(0, P.dodgeT - dt);
+
+  // --- movement
+  var mx = 0, my = 0;
+  if (keysHeld.left) mx -= 1; if (keysHeld.right) mx += 1;
+  if (keysHeld.up) my -= 1; if (keysHeld.down) my += 1;
+  var ml = Math.hypot(mx, my) || 1;
+  if (P.stunT > 0) { mx = 0; my = 0; }
+  var spd = P.speed * (P.dodgeT > 0 ? 2.5 : 1);
+  P.x += (mx/ml) * spd * dt * (mx||my ? 1 : 0);
+  P.y += (my/ml) * spd * dt * (mx||my ? 1 : 0);
+  if (mx) P.face = mx > 0 ? 1 : -1;
+  P.x = Math.max(30, Math.min(W-30, P.x)); P.y = Math.max(30, Math.min(H-30, P.y));
+
+  // --- actions
+  if (P.stunT <= 0 && (actQ.attack || keysHeld.attack) && P.atkCd <= 0) {
+    P.atkCd = 0.32;
+    var nf = nearestFoe();
+    if (nf.f && nf.d < 100) {
+      var dmg = (P.superT > 0 ? (P.supremeActive ? 5000 : 26 + (P.superBonus || 0)) : 9) + (P.atkBonus || 0);
+      damageFoe(nf.f, dmg, P.superT > 0);
+      nf.f.x += (nf.f.x - P.x) * 0.06; nf.f.y += (nf.f.y - P.y) * 0.06;
+    } else { burst(P.x + P.face*34, P.y, '#ffffff', 2); }
+  }
+  actQ.attack = false;
+  if (actQ.dodge && P.stunT <= 0 && P.dodgeCd <= 0) { P.dodgeT = 0.32; P.dodgeCd = 0.9; burst(P.x, P.y, '#9be7ff', 6); }
+  actQ.dodge = false;
+  if (actQ.web && P.stunT <= 0 && ABIL.web && P.webCd <= 0) {
+    P.webCd = 1.1;
+    var tgt = nearestFoe().f;
+    if (tgt) projs.push({ x:P.x, y:P.y, tx:tgt, speed:520, from:'player', kind:'web' });
+  }
+  actQ.web = false;
+  if (actQ.heal && P.stunT <= 0 && ABIL.heal) {
+    if (P.healCharges > 0 && P.hp < P.max) {
+      var healAmt = (gauntletMode || rematchMode || fightKind === 'venom') ? Math.round(P.max * 0.25) : 32;
+      P.healCharges--; P.hp = Math.min(P.max, P.hp + healAmt);
+      popup(P.x, P.y-48, '🩹 +' + healAmt, '#a5d6a7'); burst(P.x, P.y, '#a5d6a7', 10);
+    } else if (P.healCharges <= 0) { setMsg('🩹 No heals left this fight!', 1.4); }
+  }
+  actQ.heal = false;
+  if (actQ.super) {
+    if (P.noSuper) { setMsg('🚫 NO SUPER MODE in the Hardest fights — skill and upgrades only!', 1.8); }
+    else if (fightKind === 'lizard_clean') { setMsg('🚫 You promised yourself: NO Super Mode this fight.', 1.6); }
+    else if (ABIL.super && P.superT <= 0 && P.superMeter >= 100) {
+      P.superMeter = 0; P.superT = PROG.supremeFree ? 10 : 8;
+      P.supremeActive = !!PROG.supremeFree;
+      popup(P.x, P.y-56, PROG.supremeFree ? '👑 SUPREME MODE!' : '🔴 SUPER MODE!', PROG.supremeFree ? '#ffd83d' : '#ff5252'); burst(P.x, P.y, PROG.supremeFree ? '#ffd83d' : '#ff1744', 22);
+      if (fightKind === 'miles') { sparPhase = 2; setMsg('🔴 OUT OF CONTROL! The red aura takes him — HIT MILES!', 3); }
+      if (fightKind === 'lizard_super') { setMsg('🔴 Calm. Calm. Calm. You are in control…', 3); }
+    } else if (ABIL.super && P.superMeter < 100) { setMsg('🔴 Super meter not full yet — deal damage to charge it!', 1.4); }
+  }
+  actQ.super = false;
+
+  // --- Miles spar scripting
+  if (fightKind === 'miles' && sparPhase === 0 && !brawlMode) {
+    sparTimer += dt;
+    if (sparTimer > 16) {
+      sparPhase = 1; P.superMeter = 100;
+      setMsg("⚡ Miles is untouchable… Peter's hands start to GLOW. PRESS SUPER (U)!", 4);
+    }
+  }
+  // --- Lizard (untrained) eruption scripting
+  if (fightKind === 'lizard_u' && eruptT < 0) {
+    var lz = foes[0];
+    if (lz && lz.hp <= lz.max * 0.4) {
+      eruptT = 1.8; P.superT = 99;
+      setMsg('🔴 THE POWER ERUPTS — NO CONTROL — NO CHOICE —', 1.8);
+      burst(P.x, P.y, '#ff1744', 30);
+    }
+  }
+  if (eruptT > 0) {
+    eruptT -= dt;
+    if (foes[0]) { foes[0].hp -= 300 * dt; burst(foes[0].x, foes[0].y, '#ff5252', 4); }
+    if (eruptT <= 0) { endFight(true); return; }
+  }
+
+  // --- projectiles
+  projs = projs.filter(function(pr){
+    if (pr.from === 'player') {
+      if (!pr.tx || pr.tx.hp <= 0) return false;
+      var dx = pr.tx.x - pr.x, dy = pr.tx.y - pr.y, d = Math.hypot(dx, dy);
+      if (d < 26) {
+        if (pr.tx.fake) { damageFoe(pr.tx, 1, false); }
+        else {
+          pr.tx.stun = Math.max(pr.tx.stun, pr.tx.kind === 'thug' ? 2.4 : 0);
+          pr.tx.slow = 2.0;
+          if (pr.tx.kind !== 'thug') damageFoe(pr.tx, 3, false);
+          popup(pr.tx.x, pr.tx.y-44, '🕸️ WEBBED!', '#ffffff');
+        }
+        return false;
+      }
+      pr.x += dx/d * pr.speed * dt; pr.y += dy/d * pr.speed * dt; return true;
+    } else {
+      var dx2 = P.x - pr.x, dy2 = P.y - pr.y, d2 = Math.hypot(dx2, dy2);
+      if (d2 < 26) { if (pr.kind === 'grab') { P.stunT = 1.2; setMsg('🖤 GRABBED! A symbiote tendril holds you!', 1.2); } hurtPlayer(pr.dmg, pr.x, pr.y); return false; }
+      pr.x += dx2/d2 * pr.speed * dt; pr.y += dy2/d2 * pr.speed * dt;
+      pr.life -= dt; return pr.life > 0;
+    }
+  });
+
+  // --- foes
+  var allDead = true;
+  foes.forEach(function(f){
+    if (f.hp <= 0) return;
+    if (!f.fake) allDead = false;
+    f.flash = Math.max(0, f.flash - dt);
+    if (f.stun > 0) { f.stun -= dt; return; }
+    var slowMul = f.slow > 0 ? 0.45 : 1; if (f.slow > 0) f.slow -= dt;
+    if (f.shieldT > 0) f.shieldT -= dt;
+    if (f.hiddenT > 0) f.hiddenT -= dt;
+    var dx = P.x - f.x, dy = P.y - f.y, dist = Math.hypot(dx, dy) || 1;
+    var vx = dx/dist, vy = dy/dist;
+
+    if (f.kind === 'kingpin') {
+      // ABILITIES (Anya's design, Nov 1): 💰 Money Shield — periodic damage block.
+      // Harder versions add 🚗 Limo Crew — he calls thug backup.
+      if (f.shieldCd === undefined) { f.shieldCd = 6; f.summonT = 7; }
+      f.shieldCd -= dt;
+      if (f.shieldCd <= 0) { f.shieldCd = 12; f.shieldT = 4; setMsg('💰 KINGPIN raises his MONEY SHIELD — he cannot be hurt!', 1.6); burst(f.x, f.y, '#ffd75e', 14); }
+      if (gauntletMode || rematchMode) { f.summonT -= dt; if (f.summonT <= 0) { f.summonT = 11; var adds2 = 0; foes.forEach(function(q){ if (q.kind === 'thug' && q.hp > 0) adds2++; }); if (adds2 < 2) { var t1 = mkFoe('thug', f.x - 90, f.y + 60); t1.max = 300; t1.hp = 300; t1.dmg = 80; foes.push(t1); setMsg('🚗 KINGPIN calls his LIMO CREW!', 1.4); } } }
+      if (f.chargeState === 0) {
+        f.chargeT -= dt;
+        if (f.chargeT <= 0) { f.chargeState = 1; f.stateT = 0.6; f.chargeTx = vx; f.chargeTy = vy; setMsg('⚠️ KINGPIN IS ABOUT TO CHARGE!', 0.8); }
+        else if (dist > 56) { f.x += vx * f.speed * slowMul * dt; f.y += vy * f.speed * slowMul * dt; }
+      } else if (f.chargeState === 1) {
+        f.stateT -= dt;
+        if (f.stateT <= 0) { f.chargeState = 2; f.stateT = 0.55; }
+      } else if (f.chargeState === 2) {
+        f.x += f.chargeTx * 520 * dt; f.y += f.chargeTy * 520 * dt;
+        if (dist < 52) { hurtPlayer(f.dmg, f.x, f.y); f.chargeState = 0; f.chargeT = 3.4; }
+        f.stateT -= dt; if (f.stateT <= 0) { f.chargeState = 0; f.chargeT = 3.4; }
+      }
+    } else if (f.kind === 'miles') {
+      // ABILITY (Anya's design): harder Miles adds ⚡ OVERCHARGE — triple bolts.
+      if (f.abilT === undefined) f.abilT = 5;
+      if (gauntletMode || rematchMode) { f.abilT -= dt; if (f.abilT <= 0) { f.abilT = 8; for (var bi = 0; bi < 3; bi++) projs.push({ x:f.x, y:f.y, speed:280 + bi * 40, from:'boss', kind:'bolt', dmg:90, life:3 }); setMsg('⚡ MILES OVERCHARGE — triple bolts!', 1.2); } }
+      f.teleT -= dt;
+      if (f.teleT <= 0) { f.teleT = 1.6 + Math.random(); var a = Math.random()*6.283; f.x = P.x + Math.cos(a)*170; f.y = P.y + Math.sin(a)*170; burst(f.x, f.y, '#b388ff', 8); }
+      if (dist > 120) { f.x += vx * f.speed * slowMul * dt; f.y += vy * f.speed * slowMul * dt; }
+      f.boltT -= dt;
+      if (f.boltT <= 0) { f.boltT = 2.3; projs.push({ x:f.x, y:f.y, speed:300, from:'boss', kind:'bolt', dmg: sparPhase===2 ? 7 : (brawlMode ? 90 : 5), life:3 }); }
+    } else if (f.kind === 'lizard') {
+      // ABILITIES (Anya's design): 🦎 Regeneration below half health.
+      // Harder versions add 🦎 Acid Spit.
+      if (f.regenT === undefined) { f.regenT = 5; f.spitT = 4; }
+      f.regenT -= dt;
+      if (f.regenT <= 0) { f.regenT = 5; if (f.hp > 0 && f.hp < f.max * 0.5) { f.hp = Math.min(f.max * 0.5, f.hp + f.max * 0.02); popup(f.x, f.y - 48, '🦎 REGENERATES!', '#a5d6a7'); } }
+      if (gauntletMode || rematchMode) { f.spitT -= dt; if (f.spitT <= 0) { f.spitT = 5; projs.push({ x:f.x, y:f.y, speed:300, from:'boss', kind:'illusion', dmg:120, life:3 }); projs.push({ x:f.x, y:f.y, speed:250, from:'boss', kind:'illusion', dmg:120, life:3 }); setMsg('🦎 ACID SPIT!', 1); } }
+      if (f.chargeState === 0) {
+        f.chargeT -= dt;
+        if (f.chargeT <= 0 && dist < 330) { f.chargeState = 1; f.stateT = 0.5; f.chargeTx = vx; f.chargeTy = vy; }
+        else if (dist > 58) { f.x += vx * f.speed * slowMul * dt; f.y += vy * f.speed * slowMul * dt; }
+      } else if (f.chargeState === 1) {
+        f.stateT -= dt;
+        if (f.stateT <= 0) { f.chargeState = 2; f.stateT = 0.5; }
+      } else if (f.chargeState === 2) {
+        f.x += f.chargeTx * 470 * dt; f.y += f.chargeTy * 470 * dt;
+        if (dist < 54) { hurtPlayer(f.dmg, f.x, f.y); f.chargeState = 0; f.chargeT = 2.6; }
+        f.stateT -= dt; if (f.stateT <= 0) { f.chargeState = 0; f.chargeT = 2.6; }
+      }
+    } else if (f.kind === 'mysterio') {
+      // ABILITY (Anya's design): harder Mysterio adds 💨 SMOKE BOMB — he vanishes, untouchable.
+      if (f.smokeT === undefined) f.smokeT = 9;
+      if (gauntletMode || rematchMode) { f.smokeT -= dt; if (f.smokeT <= 0) { f.smokeT = 11; f.hiddenT = 2.5; f.x = 120 + Math.random()*(W-240); f.y = 90 + Math.random()*(H-180); burst(f.x, f.y, '#b0bec5', 16); setMsg('💨 MYSTERIO vanishes in a SMOKE BOMB!', 1.4); } }
+      f.teleT -= dt;
+      if (f.teleT <= 0) {
+        f.teleT = 3.4;
+        f.x = 120 + Math.random()*(W-240); f.y = 90 + Math.random()*(H-180);
+        burst(f.x, f.y, '#4db6ac', 10);
+        var nd = 0; foes.forEach(function(q){ if (q.fake && q.hp>0) nd++; });
+        if (nd < 2) { var dc = mkFoe('decoy', f.x + 70, f.y + 40); foes.push(dc); }
+      }
+      f.boltT -= dt;
+      if (f.boltT <= 0) { f.boltT = 2.6; projs.push({ x:f.x, y:f.y, speed:270, from:'boss', kind:'illusion', dmg:8, life:3.4 }); }
+    } else if (f.kind === 'venom') {
+      // ABILITIES (Anya's design): 🖤 Symbiote Grab (a tendril that STUNS Peter),
+      // goo bolts, a huge lunge — and under half health, 🖤 SYMBIOTE RAGE.
+      if (f.grabT === undefined) { f.grabT = 5; f.rageShown = false; }
+      var enraged = f.hp < f.max * 0.5;
+      if (enraged && !f.rageShown) { f.rageShown = true; setMsg('🖤 VENOM IS ENRAGED — faster and fiercer!', 2); }
+      var vspd = f.speed * (enraged ? 1.4 : 1);
+      if (f.chargeState === 0) {
+        f.chargeT -= dt;
+        if (f.chargeT <= 0 && dist < 380) { f.chargeState = 1; f.stateT = 0.5; f.chargeTx = vx; f.chargeTy = vy; setMsg('⚠️ VENOM IS ABOUT TO LUNGE!', 0.8); }
+        else if (dist > 60) { f.x += vx * vspd * slowMul * dt; f.y += vy * vspd * slowMul * dt; }
+      } else if (f.chargeState === 1) {
+        f.stateT -= dt;
+        if (f.stateT <= 0) { f.chargeState = 2; f.stateT = 0.5; }
+      } else if (f.chargeState === 2) {
+        f.x += f.chargeTx * 560 * dt; f.y += f.chargeTy * 560 * dt;
+        if (dist < 56) { hurtPlayer(f.dmg, f.x, f.y); f.chargeState = 0; f.chargeT = enraged ? 1.6 : 2.8; }
+        f.stateT -= dt; if (f.stateT <= 0) { f.chargeState = 0; f.chargeT = enraged ? 1.6 : 2.8; }
+      }
+      f.boltT -= dt;
+      if (f.boltT <= 0) { f.boltT = 2.6; projs.push({ x:f.x, y:f.y, speed:290, from:'boss', kind:'illusion', dmg:60, life:3.2 }); }
+      f.grabT -= dt;
+      if (f.grabT <= 0) { f.grabT = 9; projs.push({ x:f.x, y:f.y, speed:340, from:'boss', kind:'grab', dmg:40, life:3 }); setMsg('🖤 VENOM shoots a symbiote tendril!', 1.2); }
+    } else if (f.kind === 'decoy') {
+      f.wob += dt*3; f.x += Math.sin(f.wob)*22*dt; f.y += Math.cos(f.wob*0.8)*18*dt;
+    } else { // thug
+      if (dist > 48) { f.x += vx * f.speed * slowMul * dt; f.y += vy * f.speed * slowMul * dt; }
+    }
+    f.x = Math.max(28, Math.min(W-28, f.x)); f.y = Math.max(28, Math.min(H-28, f.y));
+
+    // melee
+    if (!f.fake && f.chargeState !== 2) {
+      if (dist < f.r + P.r + 8) {
+        if (f.windup <= 0 && f.atkCd <= 0) { f.windup = 0.38; }
+      }
+      if (f.windup > 0) {
+        f.windup -= dt;
+        if (f.windup <= 0) {
+          f.atkCd = 1.15;
+          if (Math.hypot(P.x-f.x, P.y-f.y) < f.r + P.r + 22) hurtPlayer(f.dmg, f.x, f.y);
+        }
+      }
+      f.atkCd = Math.max(0, f.atkCd - dt);
+    }
+  });
+  // particles & popups
+  parts = parts.filter(function(p){ p.t -= dt; p.x += p.vx*dt; p.y += p.vy*dt; return p.t > 0; });
+  pops = pops.filter(function(p){ p.t -= dt; p.y -= 26*dt; return p.t > 0; });
+
+  // --- HUD bars
+  document.getElementById('playerHpFill').style.width = Math.max(0, P.hp/P.max*100) + '%';
+  document.getElementById('bossHpFill').style.width = Math.max(0, foeTotalHp()*100) + '%';
+  document.getElementById('superFill').style.width = (P.superT > 0 ? P.superT/(P.supremeActive ? 10 : 8)*100 : P.superMeter) + '%';
+  document.getElementById('superState').textContent =
+    P.noSuper ? '🚫 BLOCKED' :
+    fightKind === 'lizard_clean' ? '🚫 PROMISED: OFF' :
+    P.superT > 0 ? (P.supremeActive ? '👑 SUPREME!' : '🔴 ACTIVE!') :
+    !ABIL.super ? '🔒' :
+    P.superMeter >= 100 ? (PROG.supremeFree ? '👑 SUPREME READY — PRESS U!' : '✨ READY — PRESS U!') : Math.floor(P.superMeter) + '%';
+  document.getElementById('healInfo').textContent = ABIL.heal ? ('· 🩹×' + P.healCharges) : '';
+
+  // --- win check (non-fake foes all down)
+  var aliveReal = foes.some(function(f){ return !f.fake && f.hp > 0; });
+  if (!aliveReal && eruptT < 0) { endFight(true); }
+}
+
+function draw(){
+  ctx.clearRect(0, 0, W, H);
+  // floor
+  var g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, '#171e38'); g.addColorStop(1, '#101527');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  ctx.strokeStyle = 'rgba(120,150,255,0.07)'; ctx.lineWidth = 1;
+  for (var x=0; x<=W; x+=60) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+  for (var y=0; y<=H; y+=60) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+  blocks.forEach(function(b){ ctx.fillStyle = 'rgba(160,180,255,' + b.a + ')'; ctx.fillRect(b.x, b.y, b.w, b.h); });
+  if (fightKind === 'lizard_clean' || fightKind === 'lizard_super' || fightKind === 'lizard_u') {
+    ctx.fillStyle = 'rgba(60,160,90,0.10)'; ctx.fillRect(0, H-46, W, 46);
+  }
+  // projectiles
+  projs.forEach(function(pr){
+    ctx.beginPath(); ctx.arc(pr.x, pr.y, pr.from==='player' ? 6 : 8, 0, 6.283);
+    ctx.fillStyle = pr.from==='player' ? '#ffffff' : (pr.kind==='bolt' ? '#ce93d8' : '#80cbc4');
+    ctx.fill(); 
+  });
+  // foes
+  foes.forEach(function(f){
+    if (f.hp <= 0) return;
+    ctx.beginPath(); ctx.ellipse(f.x, f.y + f.r*0.85, f.r*0.9, f.r*0.3, 0, 0, 6.283);
+    ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.fill();
+    if (f.windup > 0) { ctx.beginPath(); ctx.arc(f.x, f.y, f.r + 12 + Math.sin(fightTime*30)*3, 0, 6.283); ctx.strokeStyle = 'rgba(255,60,60,0.8)'; ctx.lineWidth = 3; ctx.stroke(); }
+    if ((f.kind==='kingpin' || f.kind==='lizard') && f.chargeState === 1) {
+      ctx.beginPath(); ctx.moveTo(f.x, f.y); ctx.lineTo(f.x + f.chargeTx*320, f.y + f.chargeTy*320);
+      ctx.strokeStyle = 'rgba(255,60,60,0.45)'; ctx.lineWidth = f.r; ctx.stroke();
+    }
+    ctx.beginPath(); ctx.arc(f.x, f.y, f.r + 5, 0, 6.283);
+    ctx.strokeStyle = f.flash > 0 ? '#ffffff' : f.ring; ctx.lineWidth = 3; ctx.globalAlpha = f.fake ? 0.6 : 1; ctx.stroke(); ctx.globalAlpha = 1;
+    ctx.font = Math.round(f.r*1.45) + 'px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(f.emoji, f.x, f.y + 2);
+    if (f.stun > 0) { ctx.font = '18px serif'; ctx.fillText('💫', f.x, f.y - f.r - 12); }
+    if (!f.fake && foes.length > 1 || f.kind === 'thug') {
+      ctx.fillStyle = '#400'; ctx.fillRect(f.x-24, f.y-f.r-14, 48, 6);
+      ctx.fillStyle = '#e53935'; ctx.fillRect(f.x-24, f.y-f.r-14, 48*Math.max(0, f.hp/f.max), 6);
+    }
+  });
+  // player
+  if (P.superT > 0) {
+    for (var i=0;i<3;i++){
+      ctx.beginPath(); ctx.arc(P.x, P.y, P.r + 12 + i*9 + Math.sin(fightTime*14 + i)*3, 0, 6.283);
+      ctx.strokeStyle = 'rgba(255,' + (40+i*30) + ',40,' + (0.55 - i*0.15) + ')'; ctx.lineWidth = 3.5; ctx.stroke();
+    }
+  }
+  ctx.beginPath(); ctx.ellipse(P.x, P.y + P.r*0.85, P.r*0.9, P.r*0.3, 0, 0, 6.283);
+  ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.fill();
+  ctx.beginPath(); ctx.arc(P.x, P.y, P.r + 5, 0, 6.283);
+  ctx.strokeStyle = P.flash > 0 ? '#ff5252' : (P.superT > 0 ? '#ff1744' : '#4f74e0'); ctx.lineWidth = 3.5; ctx.stroke();
+  ctx.font = '38px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('🕷️', P.x, P.y + 2);
+  if (P.dodgeT > 0) { ctx.font = '16px serif'; ctx.fillText('💨', P.x + 24, P.y - 22); }
+  // particles & popups
+  parts.forEach(function(p){ ctx.globalAlpha = Math.max(0, p.t*1.8); ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, 3.2, 0, 6.283); ctx.fill(); ctx.globalAlpha = 1; });
+  pops.forEach(function(p){ ctx.globalAlpha = Math.min(1, p.t); ctx.font = 'bold 17px Arial'; ctx.textAlign = 'center'; ctx.fillStyle = p.color; ctx.fillText(p.text, p.x, p.y); ctx.globalAlpha = 1; });
+  if (eruptT > 0) { ctx.fillStyle = 'rgba(255,20,40,' + (0.25 + Math.sin(fightTime*20)*0.12) + ')'; ctx.fillRect(0, 0, W, H); }
+  if (P.flash > 0) { ctx.fillStyle = 'rgba(255,0,0,0.13)'; ctx.fillRect(0, 0, W, H); }
+}
+
+// ---------- input ----------
+var KEYMAP = { KeyW:'up', ArrowUp:'up', KeyS:'down', ArrowDown:'down', KeyA:'left', ArrowLeft:'left', KeyD:'right', ArrowRight:'right' };
+document.addEventListener('keydown', function(e){
+  if (KEYMAP[e.code]) { keysHeld[KEYMAP[e.code]] = true; if (fightActive) e.preventDefault(); }
+  if (roamActive && (e.code === 'Space' || e.code === 'ShiftLeft' || e.code === 'ShiftRight' || e.code === 'KeyU')) { roamSwing = true; e.preventDefault(); }
+  if (!fightActive) return;
+  if (e.code === 'KeyJ' || e.code === 'Space') actQ.attack = true;
+  if (e.code === 'KeyK') actQ.dodge = true;
+  if (e.code === 'KeyL') actQ.web = true;
+  if (e.code === 'KeyH') actQ.heal = true;
+  if (e.code === 'KeyU') actQ.super = true;
+  if (e.code === 'Space') e.preventDefault();
+});
+document.addEventListener('keyup', function(e){
+  if (KEYMAP[e.code]) keysHeld[KEYMAP[e.code]] = false;
+  if (e.code === 'Space' || e.code === 'ShiftLeft' || e.code === 'ShiftRight' || e.code === 'KeyU') roamSwing = false;
+});
+window.addEventListener('touchstart', function(){ document.body.classList.add('touch'); }, { passive:true });
+function bindTouch(){
+  var btns = document.querySelectorAll('#touchBtns button');
+  Array.prototype.forEach.call(btns, function(b){
+    var k = b.getAttribute('data-k');
+    function on(e){ e.preventDefault();
+      if (k==='up'||k==='down'||k==='left'||k==='right') keysHeld[k] = true;
+      else if (k==='attack'||k==='attack2') actQ.attack = true;
+      else if (k==='dodge') actQ.dodge = true;
+      else if (k==='web') actQ.web = true;
+      else if (k==='heal') actQ.heal = true;
+      else if (k==='super') actQ.super = true;
+    }
+    function off(e){ if (e) e.preventDefault(); if (k==='up'||k==='down'||k==='left'||k==='right') keysHeld[k] = false; }
+    b.addEventListener('pointerdown', on);
+    b.addEventListener('pointerup', off);
+    b.addEventListener('pointerleave', off);
+    b.addEventListener('pointercancel', off);
+  });
+  var cvEl = document.getElementById('cv');
+  cvEl.addEventListener('touchstart', function(e){ e.preventDefault(); }, { passive:false });
+}
+
+
+// ============================================================
+//  FREE ROAM — NEW YORK CITY
+//  Nohan's expansion: "Make it so it's in New York and you can
+//  go anywhere." Chapters become missions at locations around
+//  a big scrollable city. Roam freely (walk / web-swing), then
+//  walk into the ⭐ to start the next chapter exactly as built.
+//  Roaming NEVER touches the run state S — the morality record,
+//  control track, reputation and endings are decided only by
+//  the chapters, exactly as before. Street crimes are flavour.
+// ============================================================
+var WORLD_W = 3600, WORLD_H = 2600;
+var LAND = { x:120, y:120, w:3360, h:2360 };   // Manhattan island — water all around
+var PARK = { x:1350, y:240, w:600, h:520 };    // Central Park
+var AVE_DX = 300, ST_DY = 260;                 // street grid spacing
+
+var LOCS = {
+  rooftop:  { x:450,  y:350,  emoji:'🏠', name:"Peter's Rooftop" },
+  docks:    { x:470,  y:1500, emoji:'⚓', name:'Docks District' },
+  warehouse:{ x:700,  y:2120, emoji:'🏚️', name:'Old Warehouse' },
+  downtown: { x:1200, y:1650, emoji:'📍', name:'Downtown' },
+  empire:   { x:1450, y:1480, emoji:'🏙️', name:'Empire State Building' },
+  limo:     { x:1560, y:1780, emoji:'👑', name:"Kingpin's Limo" },
+  timesq:   { x:1650, y:1250, emoji:'🌟', name:'Times Square' },
+  park:     { x:1650, y:470,  emoji:'🌳', name:'Central Park' },
+  training: { x:1650, y:700,  emoji:'🥊', name:'Training Grounds' },
+  tower:    { x:2050, y:1000, emoji:'🗼', name:'Avengers Tower' },
+  bugle:    { x:2150, y:1420, emoji:'📰', name:'Daily Bugle' },
+  miles:    { x:3050, y:700,  emoji:'🕷️', name:"Miles' Rooftop" },
+  bridge:   { x:3180, y:2180, emoji:'🌉', name:'Brooklyn Bridge' }
+};
+// chapter-entry scene -> roam gate (location + marker label)
+var ROAM_GATES = {
+  open1:         { loc:'downtown', label:'📍 Downtown — Crime Report' },
+  kingpin_intro: { loc:'limo',     label:"👑 Downtown — Kingpin's Limo" },
+  miles_choice:  { loc:'miles',    label:"🕷️ Miles' Rooftop — Talk to Miles" },
+  alone_train:   { loc:'warehouse',label:'🏚️ Old Warehouse — Train Alone' },
+  spar_intro:    { loc:'training', label:'🥊 Central Park — Training with Miles' },
+  lizard_intro:  { loc:'docks',    label:'🦎 Docks District — Something Loose!' },
+  lizard_intro_u:{ loc:'docks',    label:'🦎 Docks District — Something Loose!' },
+  realise:       { loc:'rooftop',  label:"🌅 Peter's Rooftop — Swing Home" },
+  mysterio_intro:{ loc:'timesq',   label:'🎭 Times Square — Smoke & Mirrors' }
+};
+
+// deterministic city blocks + park trees
+var roamBuildings = [], roamTrees = [];
+(function buildCity(){
+  var seed = 1234567;
+  function rnd(){ seed = (seed * 16807) % 2147483647; return seed / 2147483647; }
+  var shades = ['#232c4e','#263058','#1f2745','#2a3358','#252d52'];
+  for (var gx = LAND.x; gx + AVE_DX <= LAND.x + LAND.w; gx += AVE_DX) {
+    for (var gy = LAND.y; gy + ST_DY <= LAND.y + LAND.h; gy += ST_DY) {
+      var cx = gx + AVE_DX/2, cy = gy + ST_DY/2;
+      if (cx > PARK.x - 40 && cx < PARK.x + PARK.w + 40 && cy > PARK.y - 40 && cy < PARK.y + PARK.h + 40) continue;
+      if (Math.hypot(cx - LOCS.timesq.x, cy - LOCS.timesq.y) < 190) continue;
+      roamBuildings.push({ x: gx + 26, y: gy + 26, w: AVE_DX - 52, h: ST_DY - 52,
+                           c: shades[Math.floor(rnd()*shades.length)], winSeed: 3 + Math.floor(rnd()*991) });
+    }
+  }
+  for (var i = 0; i < 46; i++) roamTrees.push({ x: PARK.x + 30 + rnd()*(PARK.w - 60), y: PARK.y + 30 + rnd()*(PARK.h - 60) });
+})();
+
+var roamActive = false, roamBypass = false, roamPending = null;
+var RP = { x: LOCS.rooftop.x, y: LOCS.rooftop.y, faceX: 1, faceY: 0 };
+var roamLast = { x: LOCS.rooftop.x, y: LOCS.rooftop.y };
+var roamSwing = false, roamDeeds = 0, roamTime = 0;
+var roamRaf = null, roamLastTs = 0, rcv = null, rctx = null;
+var roamMsg = '', roamMsgT = 0;
+var crimes = [];
+var streetFoes = [], streetCd = 0;
+function randLandPos(){ return { x: LAND.x + 90 + Math.random() * (LAND.w - 180), y: LAND.y + 90 + Math.random() * (LAND.h - 180) }; }
+function spawnStreetFoe(sf){ var p = randLandPos(); sf.x = p.x; sf.y = p.y; sf.wx = p.x; sf.wy = p.y; sf.wt = 0; sf.active = true; sf.t = 0; }
+function startStreetFight(){
+  roamLast = { x: RP.x, y: RP.y };
+  roamActive = false;
+  if (roamRaf) cancelAnimationFrame(roamRaf); roamRaf = null;
+  keysHeld = {}; roamSwing = false;
+  startFight({ fight:'street', intro:'⚔️ A street enemy attacks! Strength tier ' + (bossWins + 1) + ' — win for a good deed!', next:null });
+}
+function exitStreetFight(){
+  roamDeeds++;
+  roamMsg = '⚔️ Street fight won! The city is safer. 💛 Good deeds: ' + roamDeeds;
+  roamMsgT = 3;
+  streetCd = 2.5;
+  enterRoam(roamPending);
+}
+function resetRoam(){
+  roamActive = false; roamPending = null; roamDeeds = 0; roamTime = 0;
+  RP.x = LOCS.rooftop.x; RP.y = LOCS.rooftop.y; RP.faceX = 1; RP.faceY = 0;
+  roamLast = { x: LOCS.rooftop.x, y: LOCS.rooftop.y };
+  roamSwing = false; roamMsg = ''; roamMsgT = 0; crimes = [];
+  streetFoes = []; streetCd = 0;
+  for (var si = 0; si < 4; si++) { var nf = {}; spawnStreetFoe(nf); streetFoes.push(nf); }
+  [[900,900],[2400,600],[2600,1900],[1000,2300],[2150,2250]].forEach(function(s){
+    crimes.push({ x:s[0], y:s[1], active:true, t:0 });
+  });
+}
+resetRoam();
+
+function roamDirArrow(L){
+  var a = Math.atan2(L.y - RP.y, L.x - RP.x);
+  var arrows = ['➡️','↘️','⬇️','↙️','⬅️','↖️','⬆️','↗️'];
+  return arrows[((Math.round(a / (Math.PI/4)) % 8) + 8) % 8];
+}
+
+function enterRoam(sceneId){
+  stopFight();
+  roamPending = sceneId;
+  roamActive = true;
+  RP.x = roamLast.x; RP.y = roamLast.y;
+  keysHeld = {}; roamSwing = false;
+  showBox('roamBox');
+  if (!rcv) { rcv = document.getElementById('rcv'); rctx = rcv.getContext('2d'); }
+  el('roamHint').textContent = '🗽 Free Roam — next: ' + ROAM_GATES[sceneId].label;
+  updateHUD();
+  roamLastTs = 0;
+  if (roamRaf) cancelAnimationFrame(roamRaf);
+  roamRaf = requestAnimationFrame(roamLoop);
+}
+function roamArriveNow(){
+  if (!roamActive || !roamPending) return;
+  var gate = ROAM_GATES[roamPending], L = LOCS[gate.loc];
+  roamLast = { x: L.x, y: L.y };
+  var target = roamPending;
+  roamActive = false; roamPending = null;
+  if (roamRaf) cancelAnimationFrame(roamRaf); roamRaf = null;
+  keysHeld = {}; roamSwing = false;
+  roamBypass = true;
+  go(target);
+  roamBypass = false;
+}
+function roamLoop(ts){
+  if (!roamActive) return;
+  roamRaf = requestAnimationFrame(roamLoop);
+  var dt = Math.min(0.033, roamLastTs ? (ts - roamLastTs)/1000 : 0.016); roamLastTs = ts;
+  roamUpdate(dt); roamDraw();
+}
+function roamUpdate(dt){
+  roamTime += dt;
+  if (roamMsgT > 0) roamMsgT -= dt;
+  var mx = 0, my = 0;
+  if (keysHeld.left) mx -= 1; if (keysHeld.right) mx += 1;
+  if (keysHeld.up) my -= 1; if (keysHeld.down) my += 1;
+  if (mx || my) {
+    var ml = Math.hypot(mx, my) || 1;
+    RP.faceX = mx/ml; RP.faceY = my/ml;
+    var spd = roamSwing ? 660 : 245;
+    RP.x += RP.faceX * spd * dt;
+    RP.y += RP.faceY * spd * dt;
+    RP.x = Math.max(LAND.x + 24, Math.min(LAND.x + LAND.w - 24, RP.x));
+    RP.y = Math.max(LAND.y + 24, Math.min(LAND.y + LAND.h - 24, RP.y));
+  }
+  // ambient street crimes: pure flavour — a thank-you counter only.
+  // They never touch S, so they can never change an ending.
+  crimes.forEach(function(cr){
+    if (!cr.active) { cr.t -= dt; if (cr.t <= 0) cr.active = true; return; }
+    if (Math.hypot(RP.x - cr.x, RP.y - cr.y) < 42) {
+      cr.active = false; cr.t = 25; roamDeeds++;
+      roamMsg = '🆘 Street crime stopped! The city notices. 💛 Good deeds: ' + roamDeeds;
+      roamMsgT = 3;
+    }
+  });
+  // Nohan's street enemies (Nov 1): random foes wander the map — walk into one to FIGHT.
+  // Strength follows the boss ladder: weak before Miles, stronger after each boss.
+  // Street wins add a good deed ONLY — they never touch S, bossWins, or any ending.
+  if (streetCd > 0) streetCd -= dt;
+  streetFoes.forEach(function(sf){
+    if (!sf.active) { sf.t -= dt; if (sf.t <= 0) spawnStreetFoe(sf); return; }
+    sf.wt -= dt;
+    var dw = Math.hypot(sf.wx - sf.x, sf.wy - sf.y);
+    if (sf.wt <= 0 || dw < 8) { var wp = randLandPos(); sf.wx = wp.x; sf.wy = wp.y; sf.wt = 6 + Math.random() * 5; }
+    else { sf.x += (sf.wx - sf.x) / dw * 42 * dt; sf.y += (sf.wy - sf.y) / dw * 42 * dt; }
+    if (streetCd <= 0 && Math.hypot(RP.x - sf.x, RP.y - sf.y) < 46) {
+      sf.active = false; sf.t = 22;
+      startStreetFight();
+    }
+  });
+  var gate = ROAM_GATES[roamPending]; if (!gate) return;
+  var L = LOCS[gate.loc];
+  var d = Math.hypot(L.x - RP.x, L.y - RP.y);
+  var hint = el('roamHint');
+  if (hint) hint.textContent = roamMsgT > 0 ? roamMsg :
+    ('🗽 Free Roam — next: ' + gate.label + '  ·  ' + Math.round(d/12) + ' m ' + roamDirArrow(L));
+  if (d < 74) roamArriveNow();
+}
+function roamDraw(){
+  if (!rctx) return;
+  var c = rctx;
+  var camX = Math.max(0, Math.min(WORLD_W - 900, RP.x - 450));
+  var camY = Math.max(0, Math.min(WORLD_H - 500, RP.y - 250));
+  c.textAlign = 'center'; c.textBaseline = 'middle';
+  // water all around the island
+  c.fillStyle = '#0d2b4a'; c.fillRect(0, 0, 900, 500);
+  c.fillStyle = 'rgba(120,190,255,0.06)';
+  for (var wv = 0; wv < 5; wv++) c.fillRect(0, (wv*113 + Math.floor(roamTime*12)) % 500, 900, 3);
+  // land
+  c.fillStyle = '#1a2140'; c.fillRect(LAND.x - camX, LAND.y - camY, LAND.w, LAND.h);
+  // Central Park
+  c.fillStyle = '#17452a'; c.fillRect(PARK.x - camX, PARK.y - camY, PARK.w, PARK.h);
+  // Times Square plaza
+  c.beginPath(); c.arc(LOCS.timesq.x - camX, LOCS.timesq.y - camY, 118, 0, 6.283);
+  c.fillStyle = '#2c2a55'; c.fill();
+  // Brooklyn Bridge deck (land edge out over the water)
+  c.fillStyle = '#4a5578';
+  c.fillRect(LOCS.bridge.x - 260 - camX, LOCS.bridge.y - 17 - camY, WORLD_W - (LOCS.bridge.x - 260), 34);
+  c.fillStyle = '#6b7ba6';
+  c.fillRect(LOCS.bridge.x - 60 - camX, LOCS.bridge.y - 90 - camY, 10, 180);
+  c.fillRect(LOCS.bridge.x + 130 - camX, LOCS.bridge.y - 90 - camY, 10, 180);
+  // streets
+  c.strokeStyle = 'rgba(205,215,255,0.13)'; c.lineWidth = 30;
+  for (var ax = LAND.x; ax <= LAND.x + LAND.w; ax += AVE_DX) {
+    var sx0 = ax - camX; if (sx0 < -40 || sx0 > 940) continue;
+    c.beginPath(); c.moveTo(sx0, LAND.y - camY); c.lineTo(sx0, LAND.y + LAND.h - camY); c.stroke();
+  }
+  c.lineWidth = 26;
+  for (var sy = LAND.y; sy <= LAND.y + LAND.h; sy += ST_DY) {
+    var sy0 = sy - camY; if (sy0 < -40 || sy0 > 540) continue;
+    c.beginPath(); c.moveTo(LAND.x - camX, sy0); c.lineTo(LAND.x + LAND.w - camX, sy0); c.stroke();
+  }
+  // buildings (rooftops — Spider-Man runs where he likes!)
+  roamBuildings.forEach(function(b){
+    var bx = b.x - camX, by = b.y - camY;
+    if (bx + b.w < -20 || by + b.h < -20 || bx > 920 || by > 520) return;
+    c.fillStyle = b.c; c.fillRect(bx, by, b.w, b.h);
+    c.strokeStyle = 'rgba(0,0,0,0.35)'; c.lineWidth = 2; c.strokeRect(bx, by, b.w, b.h);
+    c.fillStyle = 'rgba(255,220,130,0.45)';
+    for (var wi = 0; wi < 6; wi++) {
+      var wx = bx + 14 + ((b.winSeed * (wi + 3)) % Math.max(20, b.w - 34));
+      var wy = by + 14 + ((b.winSeed * (wi + 7)) % Math.max(20, b.h - 34));
+      c.fillRect(wx, wy, 5, 7);
+    }
+  });
+  // park trees
+  c.font = '22px serif';
+  roamTrees.forEach(function(t){
+    var tx = t.x - camX, ty = t.y - camY;
+    if (tx < -20 || ty < -20 || tx > 920 || ty > 520) return;
+    c.fillText('🌳', tx, ty);
+  });
+  // street-crime flavour dots
+  crimes.forEach(function(cr){
+    if (!cr.active) return;
+    var cx0 = cr.x - camX, cy0 = cr.y - camY;
+    if (cx0 < -30 || cy0 < -30 || cx0 > 930 || cy0 > 530) return;
+    c.beginPath(); c.arc(cx0, cy0, 20 + Math.sin(roamTime*5)*3, 0, 6.283);
+    c.strokeStyle = 'rgba(255,213,79,0.75)'; c.lineWidth = 2.5; c.stroke();
+    c.font = '22px serif'; c.fillText('🆘', cx0, cy0);
+  });
+  // Nohan's street enemies — red rings; walk into one to fight it
+  streetFoes.forEach(function(sf){
+    if (!sf.active) return;
+    var sx = sf.x - camX, sy = sf.y - camY;
+    if (sx < -30 || sy < -30 || sx > 930 || sy > 530) return;
+    c.beginPath(); c.arc(sx, sy, 20 + Math.sin(roamTime * 5 + 2) * 3, 0, 6.283);
+    c.strokeStyle = 'rgba(255,82,82,0.8)'; c.lineWidth = 2.5; c.stroke();
+    c.font = '22px serif'; c.fillText(bossWins >= 4 ? '☀️' : bossWins >= 2 ? '🦹' : '🥷', sx, sy);
+  });
+  // landmarks
+  Object.keys(LOCS).forEach(function(k){
+    var L = LOCS[k], lx = L.x - camX, ly = L.y - camY;
+    if (lx < -60 || ly < -50 || lx > 960 || ly > 560) return;
+    c.font = '30px serif'; c.fillText(L.emoji, lx, ly);
+    c.font = 'bold 13px Arial';
+    var tw = c.measureText(L.name).width;
+    c.fillStyle = 'rgba(6,8,18,0.66)'; c.fillRect(lx - tw/2 - 6, ly + 20, tw + 12, 18);
+    c.fillStyle = '#e8eeff'; c.fillText(L.name, lx, ly + 30);
+  });
+  // mission marker
+  var gate = roamPending ? ROAM_GATES[roamPending] : null;
+  if (gate) {
+    var GL = LOCS[gate.loc], gx = GL.x - camX, gy = GL.y - camY;
+    var dNow = Math.hypot(GL.x - RP.x, GL.y - RP.y);
+    if (gx >= -60 && gy >= -60 && gx <= 960 && gy <= 560) {
+      c.beginPath(); c.arc(gx, gy, 48 + Math.sin(roamTime*4)*8, 0, 6.283);
+      c.strokeStyle = 'rgba(255,213,79,0.95)'; c.lineWidth = 4; c.stroke();
+      c.beginPath(); c.arc(gx, gy, 30, 0, 6.283);
+      c.strokeStyle = 'rgba(255,213,79,0.45)'; c.lineWidth = 2; c.stroke();
+      c.font = '42px serif'; c.fillText('⭐', gx, gy - 4);
+      c.font = 'bold 14px Arial';
+      var gw = c.measureText(GL.name).width;
+      c.fillStyle = 'rgba(6,8,18,0.7)'; c.fillRect(gx - gw/2 - 7, gy - 78, gw + 14, 20);
+      c.fillStyle = '#ffd75e'; c.fillText(GL.name, gx, gy - 67);
+    } else {
+      var ex = Math.max(42, Math.min(858, gx)), ey = Math.max(42, Math.min(458, gy));
+      c.font = '26px serif'; c.fillText('⭐', ex, ey);
+      c.font = 'bold 13px Arial'; c.fillStyle = '#ffd75e';
+      c.fillText(Math.round(dNow/12) + ' m', ex, ey + 24);
+    }
+  }
+  // web-swing line
+  var px = RP.x - camX, py = RP.y - camY;
+  if (roamSwing && (keysHeld.left || keysHeld.right || keysHeld.up || keysHeld.down)) {
+    var anx = RP.x + RP.faceX*190 - camX, any = RP.y + RP.faceY*190 - 215 - camY;
+    c.beginPath(); c.moveTo(px, py - 8); c.lineTo(anx, any);
+    c.strokeStyle = 'rgba(255,255,255,0.85)'; c.lineWidth = 2; c.stroke();
+    c.beginPath(); c.arc(anx, any, 4, 0, 6.283); c.fillStyle = '#ffffff'; c.fill();
+  }
+  // player
+  c.beginPath(); c.ellipse(px, py + 22, 24, 8, 0, 0, 6.283);
+  c.fillStyle = 'rgba(0,0,0,0.35)'; c.fill();
+  c.beginPath(); c.arc(px, py, 31, 0, 6.283);
+  c.strokeStyle = '#4f74e0'; c.lineWidth = 3.5; c.stroke();
+  c.font = '38px serif'; c.fillText('🕷️', px, py + 2);
+}
+function bindRoamTouch(){
+  var btns = document.querySelectorAll('#roamTouch button');
+  Array.prototype.forEach.call(btns, function(b){
+    var k = b.getAttribute('data-rk');
+    function on(e){ e.preventDefault();
+      if (k === 'swing') roamSwing = true; else keysHeld[k] = true;
+    }
+    function off(e){ if (e) e.preventDefault();
+      if (k === 'swing') roamSwing = false; else keysHeld[k] = false;
+    }
+    b.addEventListener('pointerdown', on);
+    b.addEventListener('pointerup', off);
+    b.addEventListener('pointerleave', off);
+    b.addEventListener('pointercancel', off);
+  });
+  var rcvEl = document.getElementById('rcv');
+  if (rcvEl) rcvEl.addEventListener('touchstart', function(e){ e.preventDefault(); }, { passive:false });
+}
+
+// ---------- boot ----------
+document.getElementById('startBtn').addEventListener('click', function(){ startGame(); });
+document.getElementById('rushBtn').addEventListener('click', function(){ startRush(); });
+document.getElementById('gauntletBtn').addEventListener('click', function(){ startGauntlet(); });
+document.getElementById('venomBtn').addEventListener('click', function(){ ensureRun(); go('venom_urge'); });
+document.getElementById('rematchBtn').addEventListener('click', function(){ startRematch(); });
+document.getElementById('rushNextBtn').addEventListener('click', function(){
+  if (gauntletMode) startGauntletBoss();
+  else if (rematchMode) startRematchBoss();
+  else if (rushMode) startRushBoss();
+  else { showBox('titleBox'); renderUps(); renderModes(); }
+});
+document.getElementById('rushQuitBtn').addEventListener('click', function(){ rushMode = false; gauntletMode = false; rematchMode = false; showBox('titleBox'); renderUps(); renderModes(); });
+renderUps(); renderModes();
+bindTouch();
+bindRoamTouch();
+refreshEndingsTrack();
+S = newState();
+
+// test hooks (used by the automated branch smoke test)
+window.GAME = {
+  get state(){ return S; },
+  get current(){ return cur; },
+  scenes: SCENES,
+  start: startGame,
+  go: go,
+  choose: choose,
+  continueNext: function(){ var sc = SCENES[cur]; if (sc && sc.next) go(sc.next); },
+  winFight: winCurrentFight,
+  isGoodDominant: isGoodDominant,
+  setFoeHp: function(frac){ foes.forEach(function(f){ if (!f.fake) f.hp = f.max * frac; }); },
+  pump: function(){ if (fightActive) { update(0.05); draw(); } },
+  act: function(k){ actQ[k] = true; },
+  debug: function(){ return { sparPhase: sparPhase, fightActive: fightActive, foes: foes.length, superMeter: P ? P.superMeter : -1, superT: P ? P.superT : -1 }; },
+  roamActive: function(){ return roamActive; },
+  roamPos: function(){ return { x: Math.round(RP.x), y: Math.round(RP.y) }; },
+  roamMission: function(){ return roamPending; },
+  roamKey: function(k, down){ if (k === 'swing') roamSwing = !!down; else keysHeld[k] = !!down; },
+  roamPump: function(n){ for (var i=0;i<(n||1);i++){ if (roamActive) { roamUpdate(0.05); roamDraw(); } } },
+  roamTeleport: function(x, y){ RP.x = x; RP.y = y; },
+  roamArrive: function(){ if (roamActive) roamArriveNow(); },
+  roamDeeds: function(){ return roamDeeds; }
+};
+</script>
+</body>
+</html>
