@@ -107,6 +107,7 @@
         <button class="bigbtn" id="gauntletBtn" style="margin-top:8px;">🔥 &nbsp;HARDEST GAUNTLET</button>
         <button class="bigbtn" id="venomBtn" style="margin-top:8px;">🖤 &nbsp;DLC: VENOM</button>
         <button class="bigbtn" id="rematchBtn" style="margin-top:8px;">🔥 &nbsp;FINAL REMATCH</button>
+        <button class="bigbtn" id="mirrorBtn" style="margin-top:8px;">🪞 &nbsp;SECRET: THE MIRROR</button>
       </div>
       <p id="progStatus" style="color:#ffd83d;font-size:13.5px;margin-top:10px;"></p>
       <p id="rushBest" style="color:#ce93d8;font-size:13.5px;margin-top:2px;"></p>
@@ -309,6 +310,38 @@ var SCENES = {
     ], next:'venom_done' },
 
   venom_done: { type:'handler', fn:'toTitle' },
+
+  mirror_call: { type:'story', chapter:'🪞 SECRET — THE MIRROR', art:'📱', bg:'linear-gradient(160deg,#14060a,#1c1030)',
+    text:[
+      "Weeks later. The city is safe. Supreme power hums quietly in Peter's chest, fully his.",
+      "His phone rings. <span class='speaker'>Miles:</span> \"Pete. There's a new one. Illusions — but not like Mysterio. Mysterio makes tricks. This one makes… <b>places</b>. Whole places that aren't real.\"",
+      "<span class='speaker'>Miles:</span> \"I went in for ten seconds and I still don't trust doorways. Be careful. He's wearing a face that— Pete, he's wearing <b>your</b> face.\""
+    ], next:'mirror_enter' },
+
+  mirror_enter: { type:'story', chapter:'🪞 SECRET — The Mirror Dimension', art:'🪞', bg:'linear-gradient(160deg,#1a0210,#0a0a18)',
+    text:[
+      "The address Miles sent isn't a building. It's a doorway standing in the middle of an empty street, opening onto a New York made of glass.",
+      "Peter steps through. Every window reflects him. Every reflection is smiling — and he is not.",
+      "Then one reflection steps OUT of the glass. Same suit. Same stance. No restraint in his eyes at all.",
+      "<span class='speaker'>THE MIRROR:</span> \"You hold back. Every fight, every punch — you hold back. I am what happens when you don't. I am what happens when you <b>never tell the truth</b>.\""
+    ], next:'mirror_fight_scene' },
+
+  mirror_fight_scene: { type:'fight', fight:'mirror', chapter:'🪞 SECRET — THE MIRROR',
+    intro:"THE MIRROR — 100,000 HP! 🪞 When he CONCENTRATES (10 seconds), DODGE the 50,000 punch — or fire SUPER to CANCEL it and stun him for 10 seconds!", next:'mirror_mark' },
+
+  mirror_mark: { type:'handler', fn:'mirrorBeaten' },
+
+  mirror_outro: { type:'story', chapter:'🪞 SECRET — The Code', art:'🌅', bg:'linear-gradient(160deg,#2c2038,#101828)',
+    text:[
+      "One thousand health left. The Mirror is on his knees in the broken glass, and Peter's fist is raised — and the aura is SCREAMING at him to finish it.",
+      "Peter looks at the face under him. His own. The version of him that let the secret rot, that held nothing back, that became THIS.",
+      "He lowers his fist. <span class='speaker'>Peter:</span> \"No. That's the whole difference between us. Spider-Man has a code. I stop — even when it's me I'm stopping.\"",
+      "The Mirror stares… and for the first time, the reflection looks afraid of the real thing. The glass world cracks, folds — and lets him go."
+    ], next:'mirror_home_scene' },
+
+  mirror_home_scene: { type:'handler', fn:'mirrorHome' },
+
+  mirror_home: { type:'handler', fn:'toTitle' },
 
   kingpin_intro: { type:'story', chapter:'Boss 1 — Trouble Rolls In', art:'🚚', bg:'linear-gradient(160deg,#2c2c3a,#101018)',
     text:[
@@ -587,7 +620,12 @@ var HANDLERS = {
     if (!PROG.venomDone) { PROG.venomDone = true; UP.pts += 4; saveUP(); savePROG(); }
     go('venom_after');
   },
-  toTitle: function(){ rushMode = false; gauntletMode = false; rematchMode = false; showBox('titleBox'); renderUps(); renderModes(); }
+  toTitle: function(){ rushMode = false; gauntletMode = false; rematchMode = false; showBox('titleBox'); renderUps(); renderModes(); },
+  mirrorBeaten: function(){
+    if (!PROG.mirrorDone) { PROG.mirrorDone = true; UP.pts += 10; saveUP(); savePROG(); }
+    go('mirror_outro');
+  },
+  mirrorHome: function(){ enterRoam('mirror_home'); }
 };
 
 // ============================================================
@@ -721,7 +759,7 @@ var UP = { pts:0, hp:0, hit:0, heal:0, sup:0, spd:0 };
 try { var upSv = JSON.parse(localStorage.getItem(UPKEY) || 'null'); if (upSv) { for (var uk in UP) if (typeof upSv[uk] === 'number') UP[uk] = upSv[uk]; } } catch (e) {}
 function saveUP(){ try { localStorage.setItem(UPKEY, JSON.stringify(UP)); } catch (e) {} }
 var PROGKEY = 'redAuraProgress';
-var PROG = { rushDone:false, gauntletDone:false, venomDone:false, rematchDone:false, supremeFree:false };
+var PROG = { rushDone:false, gauntletDone:false, venomDone:false, rematchDone:false, supremeFree:false, mirrorDone:false };
 try { var pgSv = JSON.parse(localStorage.getItem(PROGKEY) || 'null'); if (pgSv) { for (var pk in PROG) if (typeof pgSv[pk] === 'boolean') PROG[pk] = pgSv[pk]; } } catch (e) {}
 function savePROG(){ try { localStorage.setItem(PROGKEY, JSON.stringify(PROG)); } catch (e) {} }
 var RUSHBESTKEY = 'redAuraRushBest';
@@ -761,7 +799,8 @@ function renderModes(){
   var gb = el('gauntletBtn'); if (gb) { var gl2 = !PROG.rushDone; gb.innerHTML = gl2 ? '🔒 &nbsp;HARDEST GAUNTLET — beat Boss Rush Cycle 5' : '🔥 &nbsp;HARDEST GAUNTLET — all 10,000 HP, NO Super Mode'; gb.disabled = gl2; }
   var vb = el('venomBtn'); if (vb) { var vl = !PROG.gauntletDone; vb.innerHTML = vl ? '🔒 &nbsp;DLC: VENOM — beat the Hardest Gauntlet' : (PROG.venomDone ? '🖤 &nbsp;DLC: VENOM — fight him again!' : '🖤 &nbsp;DLC: VENOM — Miles is calling…'); vb.disabled = vl; }
   var mb = el('rematchBtn'); if (mb) { var ml2 = !PROG.venomDone; mb.innerHTML = ml2 ? '🔒 &nbsp;FINAL REMATCH — beat Venom first' : (PROG.supremeFree ? '👑 &nbsp;FINAL REMATCH — cleared! Supreme is yours' : '🔥 &nbsp;FINAL REMATCH — 10,000 HP, harder hits'); mb.disabled = ml2; }
-  var ps = el('progStatus'); if (ps) ps.textContent = [storyDone() ? '📖 Story ✔' : '📖 Story', PROG.rushDone ? '👑 Rush ✔' : '👑 Rush', PROG.gauntletDone ? '🔥 Gauntlet ✔' : '🔥 Gauntlet', PROG.venomDone ? '🖤 Venom ✔' : '🖤 Venom', PROG.supremeFree ? '👑 SUPREME EVERYWHERE' : '👑 Supreme 🔒'].join(' · ');
+  var xb = el('mirrorBtn'); if (xb) { var xl = !PROG.supremeFree; xb.innerHTML = xl ? '🔒 &nbsp;SECRET: THE MIRROR — unlock Supreme everywhere first' : (PROG.mirrorDone ? '🪞 &nbsp;SECRET: THE MIRROR — defeated ✔ (fight again)' : '🪞 &nbsp;SECRET: THE MIRROR — Miles has a warning…'); xb.disabled = xl; }
+  var ps = el('progStatus'); if (ps) ps.textContent = [storyDone() ? '📖 Story ✔' : '📖 Story', PROG.rushDone ? '👑 Rush ✔' : '👑 Rush', PROG.gauntletDone ? '🔥 Gauntlet ✔' : '🔥 Gauntlet', PROG.venomDone ? '🖤 Venom ✔' : '🖤 Venom', PROG.supremeFree ? '👑 SUPREME EVERYWHERE' : '👑 Supreme 🔒', PROG.mirrorDone ? '🪞 Mirror ✔' : '🪞 Mirror'].join(' · ');
   var rbst = el('rushBest'); if (rbst) rbst.textContent = rushBest.cycle ? ('🏆 Rush best: Cycle ' + rushBest.cycle + ', boss ' + (rushBest.step + 1) + ' of 4') : '';
 }
 function ensureRun(){ if (!S) S = newState(); ABIL.web = true; ABIL.heal = true; ABIL.super = true; }
@@ -827,6 +866,7 @@ var FIGHTS = {
   lizard_u:     { label:'🦎 THE LIZARD',   make:function(){ return [mkFoe('lizard',620,250)]; } },
   mysterio:     { label:'🎭 MYSTERIO',     make:function(){ return [mkFoe('mysterio',620,200)]; } },
   venom:        { label:'🖤 VENOM',        make:function(){ return [mkFoe('venom',620,250)]; } },
+  mirror:       { label:'🪞 THE MIRROR',   make:function(){ return [mkFoe('mirror',620,250)]; } },
   street:       { label:'🥷 STREET THUG',  make:function(){
     // Nohan's street enemies (Nov 1): strength climbs the SAME ladder as the bosses (bossWins).
     var t = bossWins, n = 1 + (t >= 2 ? 1 : 0) + (t >= 4 ? 1 : 0), out = [];
@@ -847,6 +887,7 @@ function mkFoe(kind, x, y){
   if (kind==='mysterio')return Object.assign(base, { hp:240, max:240, r:28, speed:96, dmg:9, emoji:'🎭', ring:'#4db6ac' });
   if (kind==='decoy')   return Object.assign(base, { hp:1, max:1, r:28, speed:40, dmg:0, emoji:'🎭', ring:'#4db6ac', fake:true });
   if (kind==='venom')   return Object.assign(base, { hp:50000, max:50000, r:38, speed:126, dmg:200, emoji:'🖤', ring:'#ce93d8' });
+  if (kind==='mirror')  return Object.assign(base, { hp:100000, max:100000, r:26, speed:196, dmg:2500, emoji:'🕷️', ring:'#ff1744' });
   return base;
 }
 
@@ -881,11 +922,13 @@ function startFight(scene){
     var gt2 = GT[fightKind];
     foes.forEach(function(f){ if (!f.fake && gt2) { f.max = gt2.hp; f.hp = gt2.hp; f.dmg = gt2.dmg; } });
     P.noSuper = true; P.superMeter = 0;
+    P.atkBonus = 23 + 2 * UP.hit; // NOHAN'S BALANCE RULE: ~1,000 NORMAL damage per 10 seconds in the 10,000-HP tiers
     P.max = Math.max(P.max, 1000); P.hp = P.max;
   } else if (rematchMode) {
     var RT = { kingpin:{hp:10000,dmg:300}, miles:{hp:10000,dmg:600}, lizard_super:{hp:10000,dmg:900}, mysterio:{hp:10000,dmg:1200} };
     var rt2 = RT[fightKind];
     foes.forEach(function(f){ if (!f.fake && rt2) { f.max = rt2.hp; f.hp = rt2.hp; f.dmg = rt2.dmg; } });
+    P.atkBonus = 23 + 2 * UP.hit; // NOHAN'S BALANCE RULE: ~1,000 NORMAL damage per 10 seconds in the 10,000-HP tiers
     P.max = Math.max(P.max, 1000); P.hp = P.max;
   } else if (rushMode) {
     var RAW = { kingpin:300, miles:340, lizard_super:260, mysterio:240 };
@@ -894,6 +937,7 @@ function startFight(scene){
     foes.forEach(function(f){ if (!f.fake && rcap2) { var tgt2 = Math.round(RAW[fightKind] + (rcap2 - RAW[fightKind]) * (rcyc2 - 1) / 4); f.max = tgt2; f.hp = tgt2; f.dmg = Math.round(f.dmg * (1 + 0.35 * (rcyc2 - 1))); } });
   }
   if (fightKind === 'venom') { P.max = Math.max(P.max, 1000); P.hp = P.max; }
+  if (fightKind === 'mirror') { P.max = 100000; P.hp = P.max; } // the Mirror duel: Peter at his absolute full potential — the most health upgrades can ever give
   brawlMode = (fightKind === 'miles' && (gauntletMode || rematchMode));
   if (bord >= 1) { setTimeout(function(){ setMsg('⚔️ BOSS ' + bord + ' — this enemy is stronger than the last… but so is Peter! ❤️ HP ' + P.max + ' · 👊 Hit ' + (9 + P.atkBonus) + (bossWins ? ' · Bosses beaten: ' + bossWins : ''), 3.6); }, 4800); }
   projs = []; pops = []; parts = [];
@@ -952,6 +996,13 @@ function damageFoe(f, dmg, isSuper){
     P.superBonus = Math.min(15, thugWins) + 2 * UP.sup;
     P.superRate = computeSuperRate() * (PROG.supremeFree ? 2 : 1);
     setMsg('⬆️ THUG DOWN! Peter grows a little — ❤️ ' + P.max + ' HP · 👊 Hit ' + (9 + P.atkBonus) + ' · 🔴 SUPER charges faster + hits harder! (Thugs beaten: ' + thugWins + ')', 1.8);
+  }
+  // THE MIRROR (Nohan's second secret boss): the realisation at 10,000 damage dealt —
+  // and at the last 1,000 HP, Peter's CODE stops his own hand. The fight ends by mercy, not by a kill.
+  if (f.kind === 'mirror') {
+    f.dealt = (f.dealt || 0) + dmg;
+    if (!f.realised && f.dealt >= 10000) { f.realised = true; setMsg('🪞 "I know you… You are what I become if I never told Miles the truth."', 4); }
+    if (f.hp <= 1000) { f.hp = 1000; setMsg('✋ …No. Spider-Man has a CODE.', 2); endFight(true); return; }
   }
   // NOHAN'S SUPREME TRIGGER: in the Venom fight and the Final Rematch, every 1,000 damage
   // dealt awakens SUPREME MODE for 10 seconds — every hit does 5,000 damage.
@@ -1185,6 +1236,36 @@ function update(dt){
       if (f.boltT <= 0) { f.boltT = 2.6; projs.push({ x:f.x, y:f.y, speed:290, from:'boss', kind:'illusion', dmg:60, life:3.2 }); }
       f.grabT -= dt;
       if (f.grabT <= 0) { f.grabT = 9; projs.push({ x:f.x, y:f.y, speed:340, from:'boss', kind:'grab', dmg:40, life:3 }); setMsg('🖤 VENOM shoots a symbiote tendril!', 1.2); }
+    } else if (f.kind === 'mirror') {
+      // THE MIRROR (Anya's build of Nohan's design): teleports, illusion bolts, decoys —
+      // and 🌀 CONCENTRATION: a 10-second charge-up ending in a 50,000-damage punch.
+      // Dodge it… or fire SUPER during the charge to CANCEL it and stun him for 10 seconds!
+      if (f.focusT === undefined) { f.focusT = 18; f.focusLeft = 0; f.focusSec = -1; }
+      if (f.focusLeft > 0) {
+        if (P.superT > 0) {
+          f.focusLeft = 0; f.focusT = 22; f.stun = 10;
+          setMsg('💥 INTERRUPTED! Your Super power shatters his concentration — THE MIRROR IS STUNNED for 10 seconds! HIT HIM!', 3);
+          burst(f.x, f.y, '#ffd83d', 30);
+        } else {
+          f.focusLeft -= dt;
+          var secLeft = Math.ceil(f.focusLeft);
+          if (secLeft !== f.focusSec) { f.focusSec = secLeft; popup(f.x, f.y - 60, '🌀 ' + secLeft, '#ff8a80'); if (secLeft === 10 || secLeft === 5 || secLeft === 1) setMsg('⚠️ HE IS CONCENTRATING — ' + secLeft + '… (DODGE the punch, or fire SUPER to cancel it!)', 1.6); }
+          if (f.focusLeft <= 0) {
+            f.focusT = 22;
+            if (Math.hypot(P.x - f.x, P.y - f.y) < 210 && P.dodgeT <= 0) { hurtPlayer(50000, f.x, f.y); setMsg('💥 THE 50,000 PUNCH LANDS!', 2); }
+            else setMsg('💨 YOU DODGED THE 50,000 PUNCH!', 2);
+            burst(f.x, f.y, '#ff1744', 34);
+          }
+        }
+      } else {
+        f.focusT -= dt;
+        if (f.focusT <= 0) { f.focusLeft = 10; f.focusSec = -1; setMsg('🌀 THE MIRROR stops… and starts to CONCENTRATE. The air itself feels heavy.', 2.4); }
+        f.teleT -= dt;
+        if (f.teleT <= 0) { f.teleT = 2.4 + Math.random(); var a2 = Math.random()*6.283; f.x = P.x + Math.cos(a2)*180; f.y = P.y + Math.sin(a2)*180; burst(f.x, f.y, '#ff8a80', 8); }
+        if (dist > 130) { f.x += vx * f.speed * slowMul * dt; f.y += vy * f.speed * slowMul * dt; }
+        f.boltT -= dt;
+        if (f.boltT <= 0) { f.boltT = 2.4; projs.push({ x:f.x, y:f.y, speed:300, from:'boss', kind:'illusion', dmg:1500, life:3 }); var nd2 = 0; foes.forEach(function(q){ if (q.fake && q.hp>0) nd2++; }); if (nd2 < 2) { var dc2 = mkFoe('decoy', f.x + 70, f.y + 40); foes.push(dc2); } }
+      }
     } else if (f.kind === 'decoy') {
       f.wob += dt*3; f.x += Math.sin(f.wob)*22*dt; f.y += Math.cos(f.wob*0.8)*18*dt;
     } else { // thug
@@ -1193,7 +1274,7 @@ function update(dt){
     f.x = Math.max(28, Math.min(W-28, f.x)); f.y = Math.max(28, Math.min(H-28, f.y));
 
     // melee
-    if (!f.fake && f.chargeState !== 2) {
+    if (!f.fake && f.chargeState !== 2 && !(f.kind === 'mirror' && f.focusLeft > 0)) {
       if (dist < f.r + P.r + 8) {
         if (f.windup <= 0 && f.atkCd <= 0) { f.windup = 0.38; }
       }
@@ -1369,6 +1450,7 @@ var ROAM_GATES = {
   lizard_intro:  { loc:'docks',    label:'🦎 Docks District — Something Loose!' },
   lizard_intro_u:{ loc:'docks',    label:'🦎 Docks District — Something Loose!' },
   realise:       { loc:'rooftop',  label:"🌅 Peter's Rooftop — Swing Home" },
+  mirror_home:   { loc:'rooftop',  label:"🌅 Peter's Rooftop — Home (Mirror defeated 🪞)" },
   mysterio_intro:{ loc:'timesq',   label:'🎭 Times Square — Smoke & Mirrors' }
 };
 
@@ -1657,6 +1739,7 @@ document.getElementById('rushBtn').addEventListener('click', function(){ startRu
 document.getElementById('gauntletBtn').addEventListener('click', function(){ startGauntlet(); });
 document.getElementById('venomBtn').addEventListener('click', function(){ ensureRun(); go('venom_urge'); });
 document.getElementById('rematchBtn').addEventListener('click', function(){ startRematch(); });
+document.getElementById('mirrorBtn').addEventListener('click', function(){ ensureRun(); go('mirror_call'); });
 document.getElementById('rushNextBtn').addEventListener('click', function(){
   if (gauntletMode) startGauntletBoss();
   else if (rematchMode) startRematchBoss();
