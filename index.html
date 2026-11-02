@@ -327,7 +327,7 @@ var SCENES = {
     ], next:'mirror_fight_scene' },
 
   mirror_fight_scene: { type:'fight', fight:'mirror', chapter:'🪞 SECRET — THE MIRROR',
-    intro:"THE MIRROR — 100,000 HP! 🪞 When he CONCENTRATES (10 seconds), DODGE the 50,000 punch — or fire SUPER to CANCEL it and stun him for 10 seconds!", next:'mirror_mark' },
+    intro:"THE MIRROR — 100,000 HP! 🪞 ⚠️ HEALTH: this duel boosts you to at least 60,000 HP — his punch does 50,000! When he CONCENTRATES (10 seconds), DODGE it — or fire SUPER to CANCEL it and stun him! At half health, Peter awakens the SUPREME SUPER MODE!", next:'mirror_mark' },
 
   mirror_mark: { type:'handler', fn:'mirrorBeaten' },
 
@@ -913,7 +913,7 @@ function startFight(scene){
   P.healCharges = 2 + UP.heal;
   P.speed = 215 + 8 * UP.spd;
   P.max = 100 + 20 * bossWins + 4 * thugWins + 25 * UP.hp; P.hp = P.max;
-  P.noSuper = false; P.supremeActive = false; P.supremeCharge = 0;
+  P.noSuper = false; P.supremeActive = false; P.supremeCharge = 0; P.supremeSuper = false;
   if (bord > 1) { var hm = 1 + 0.25 * (bord - 1), dm = 1 + 0.15 * (bord - 1);
     foes.forEach(function(f){ if (!f.fake) { f.max = Math.round(f.max * hm); f.hp = f.max; f.dmg = Math.round(f.dmg * dm); } }); }
   // MODE OVERRIDES — Nohan's endgame ladder: exact designer numbers for the hardest tiers.
@@ -937,7 +937,7 @@ function startFight(scene){
     foes.forEach(function(f){ if (!f.fake && rcap2) { var tgt2 = Math.round(RAW[fightKind] + (rcap2 - RAW[fightKind]) * (rcyc2 - 1) / 4); f.max = tgt2; f.hp = tgt2; f.dmg = Math.round(f.dmg * (1 + 0.35 * (rcyc2 - 1))); } });
   }
   if (fightKind === 'venom') { P.max = Math.max(P.max, 1000); P.hp = P.max; }
-  if (fightKind === 'mirror') { P.max = 100000; P.hp = P.max; } // the Mirror duel: Peter at his absolute full potential — the most health upgrades can ever give
+  if (fightKind === 'mirror') { P.max = Math.max(P.max, 60000); P.hp = P.max; } // NOHAN'S HEALTH RULE: at least 60,000 health for the Mirror duel — his punch does 50,000, so one hit is survivable, two are not
   brawlMode = (fightKind === 'miles' && (gauntletMode || rematchMode));
   if (bord >= 1) { setTimeout(function(){ setMsg('⚔️ BOSS ' + bord + ' — this enemy is stronger than the last… but so is Peter! ❤️ HP ' + P.max + ' · 👊 Hit ' + (9 + P.atkBonus) + (bossWins ? ' · Bosses beaten: ' + bossWins : ''), 3.6); }, 4800); }
   projs = []; pops = []; parts = [];
@@ -965,6 +965,7 @@ function winCurrentFight(){ if (fightActive) endFight(true); }
 function foeTotalHp(){ var t=0,m=0; foes.forEach(function(f){ if(!f.fake){ t+=Math.max(0,f.hp); m+=f.max; } }); return m? t/m : 0; }
 
 function hurtPlayer(dmg, sx, sy){
+  if (P.supremeSuper && Math.random() < 0.85) { popup(P.x, P.y-44, '⚡ SUPER INSTINCT!', '#ffe082'); return; }
   if (P.dodgeT > 0) { popup(P.x, P.y-44, '💨 DODGED!', '#9be7ff'); return; }
   if (P.superT > 0) { popup(P.x, P.y-44, '🌀 SENSE DODGE!', '#ff8a80'); burst(P.x, P.y, '#ff5252', 6); return; }
   P.hp -= dmg; P.flash = 0.25;
@@ -1002,6 +1003,17 @@ function damageFoe(f, dmg, isSuper){
   if (f.kind === 'mirror') {
     f.dealt = (f.dealt || 0) + dmg;
     if (!f.realised && f.dealt >= 10000) { f.realised = true; setMsg('🪞 "I know you… You are what I become if I never told Miles the truth."', 4); }
+    // NOHAN'S SUPREME SUPER MODE: at half health (50,000), Peter awakens mid-fight —
+    // every 10th combo hit strikes for 10,000, and SUPER INSTINCT dodges almost anything.
+    if (!f.ssUnlocked && f.hp <= 50000) {
+      f.ssUnlocked = true; P.supremeSuper = true;
+      setMsg('👑✨ SUPREME SUPER MODE AWAKENS! Every 10th combo hit does 10,000 damage — and SUPER INSTINCT dodges almost anything!', 4.5);
+      popup(P.x, P.y - 56, '👑✨ SUPREME SUPER!', '#ffe082'); burst(P.x, P.y, '#ffe082', 34);
+    }
+    if (P.supremeSuper) {
+      f.combo = (f.combo || 0) + 1;
+      if (f.combo % 10 === 0) { f.hp -= 10000; popup(f.x, f.y - 52, '🔥 10-HIT COMBO — 10,000!', '#ffd83d'); burst(f.x, f.y, '#ffd83d', 22); }
+    }
     if (f.hp <= 1000) { f.hp = 1000; setMsg('✋ …No. Spider-Man has a CODE.', 2); endFight(true); return; }
   }
   // NOHAN'S SUPREME TRIGGER: in the Venom fight and the Final Rematch, every 1,000 damage
@@ -1299,6 +1311,7 @@ function update(dt){
   document.getElementById('superState').textContent =
     P.noSuper ? '🚫 BLOCKED' :
     fightKind === 'lizard_clean' ? '🚫 PROMISED: OFF' :
+    P.supremeSuper ? '👑✨ SUPREME SUPER!' :
     P.superT > 0 ? (P.supremeActive ? '👑 SUPREME!' : '🔴 ACTIVE!') :
     !ABIL.super ? '🔒' :
     P.superMeter >= 100 ? (PROG.supremeFree ? '👑 SUPREME READY — PRESS U!' : '✨ READY — PRESS U!') : Math.floor(P.superMeter) + '%';
